@@ -1,0 +1,140 @@
+body {
+    background-color: #011F3F;
+    text-align: center;
+    font-family: 'Press Start 2P';
+}
+
+
+.popup {
+  font: 12px 'Inter', sans-serif;
+  color: white;
+  /* background-color: white; */
+  border: 2px solid white;
+  width: 25%;
+  position: fixed;
+  right: 24%;
+  top: 17%;
+  margin: 0;
+  padding: 0;
+}
+
+.popup-container {
+  color: white;
+  font: 25px Arial, sans-serif;
+  font-weight: bold;
+  position: absolute;
+  right: 23%;
+  top: 10%;
+  display: relative;
+  display: block;
+  border: 3px solid white;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  padding: 5px;
+  margin: auto;
+  text-align: center;
+}
+
+button {
+  margin-top: 20px;
+  padding: 1.5rem 5rem;
+  font-family: 'Press Start 2P';
+  font-size: 3rem;
+  color: white;
+  background-color: rgba(0, 0, 0, 0);
+  border: 3px solid white;
+  /* margin-bottom: 20px; */
+}
+
+button:hover {
+  color: #dddddd;
+  border: 3px solid #dddddd;
+}
+
+button:active {
+  color: #888888;
+  border: 3px solid #888888;
+}
+
+.level-title {
+  font-family: 'Press Start 2P';
+  font-size: 3rem;
+  margin: 5%;
+  color: white;
+}
+
+.game-container {
+  display: flex;
+  margin: auto;
+  width: 80%;
+
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.die {
+  /* display:flex; */
+  height: 100px;
+  width: 100px;
+  margin: 5%;
+  border-radius: 10px;
+  background-color: white;
+  border: 5px solid black;
+}
+
+.dot {
+  display: block;
+   width: 24px;
+   height: 24px;
+   border-radius: 50%;
+   background-color:black;
+}
+
+/* https://betterprogramming.pub/creating-dice-in-flexbox-in-css-a02a5d85e516 */
+.dice-1 {
+  display: flex;
+  height: 100%;
+  margin: 0;
+  justify-content: center;
+  align-items: center;
+}
+
+.dice-2, .dice-3 {
+  display: flex;
+  justify-content: space-between;
+  height: 90%;
+  width: 90%;
+  margin: 5%;
+}
+
+.dice-2, .dot:nth-of-type(2) {
+  align-self: flex-end;
+}
+
+.dice-3 .dot:nth-of-type(2) {
+  align-self: center;
+}
+
+.dice-3 .dot:nth-of-type(1) {
+  align-self: flex-end;
+}
+
+.dice-4, .dice-5, .dice-6 {
+  display: flex;
+  height: 90%;
+  width: 90%;
+  margin: 5%;
+  justify-content: space-between;
+}
+
+.dice-4 .column, .dice-5 .column, .dice-6 .column {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.dice-5 .dot:nth-of-type(1) {
+  align-self: center;
+}
