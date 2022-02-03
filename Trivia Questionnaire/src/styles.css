@@ -1,0 +1,41 @@
+body {
+    text-align: left;
+    color: #293264;
+}
+
+button {
+    color: #293264;
+    margin: 0 5% 0 0;
+    background-color: white;
+    border: 2px solid #4D5B9E;
+    border-radius: 8px;
+    transition-duration: 0.2s;
+}
+
+button:hover {
+    background-color: #f3f5fc;
+    border-color: #f3f5fc;
+}
+
+.selected {
+    background-color: #D6DBF5;
+    /* border-color: #D6DBF5; */
+    border-color: red;
+}
+
+.correct {
+    background-color: lightgreen;
+}
+
+.incorrect {
+    background-color: red;
+}
+
+.faded {
+    background-color: yellow;
+}
+
+.question-container {
+    display: flex;
+    justify-content: flex-start;
+}

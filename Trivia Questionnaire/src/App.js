@@ -8,61 +8,107 @@ export default function App() {
   const [start, setStart] = React.useState(false)
   const [checked, setChecked] = React.useState(false)
   
-
   const [allQuestions, setAllQuestions] = React.useState([])
   const [selected, setSelected] = React.useState([])
+  
     
-    
-// try make state object array > map allquestions into new array, getting id and having state selected, put it in prop
+//move questions here and send over to Questions.js via props, to remove randomisation on rerender.
 
   React.useEffect(() => {
-      fetch("https://opentdb.com/api.php?amount=10")
-          .then(res => res.json())
-          .then(data => setAllQuestions(data.results))
-
+    fetch("https://opentdb.com/api.php?amount=5")
+        .then(res => res.json())
+        .then(data => setAllQuestions(data.results))
+  
   }, [])
 
 
   function checkAnswers() {
-    setChecked(true)
-  }
-
-
-
-  function initialiseStated() {
-    for (let i = 1; i <= 10; i++) {
-      let temp = {
-        id: i,
-        select: ""
+    let checkall = true
+    for (let i = 1; i <= selected.length; i++) {
+      if (selected.find(select => select.id === i).select === "") {
+        checkall = false
+        break
       }
-      setSelected(prev => [temp, ...prev])
+    }
+    if (checkall) {
+      setChecked(true)
+    } else {
+      alert("Answer all questions to see solution")
     }
     
   }
 
+  function randomise(rightAnswer, options) {
+    if (options.includes(rightAnswer)) {
+      if (options.length === 2) {
+        options = ["True", "False"]
+      }
+      return options
+    } else {
+      options.push(rightAnswer)
+    //https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array#:~:text=209-,You,-can%20do%20it
+    if (options.length !== 2) {
+      options = options
+        .map(value => ({ value, sort: Math.random() }))
+        .sort((a, b) => a.sort - b.sort)
+        .map(({ value }) => value)
+    } else {
+      options = ["True", "False"]
+    }
+    return options
+    }
+  }
 
-  function updateSelected(id, text) {
+  function initialiseStated() {
+    for (let i = 1; i <= 5; i++) {
+      let temp = {
+        id: i,
+        select: "",
+        correct: ""
+      }
+      setSelected(prev => [temp, ...prev])
+    }
+  }
+
+  function updateSelected(id, text, correct) {
     setSelected(prev => prev.map(data => (
-      data.id === id ? { ...data, select:text } : data)
-    ))
+      data.id === id ? { ...data, select:text, correct: correct} : data)
+    ))  
+  }
+
+  
+  function score() {
+    let mark = 0
+    for (let i = 1; i <= allQuestions.length; i++) {
+
+      if (selected.find(question => question.id === i).correct === selected.find(chosen => chosen.id === i).select) {
+        mark++
+      }
+    }
+    console.log(allQuestions.length)
+    return mark
   }
 
   function startQuiz() {
-    setStart(prev => !prev)
+    setStart(prev => true)
     initialiseStated()
-    console.log(selected.length)
-    
+  }
+
+  function restartPage() {
+    window.location.reload();
   }
 
   let id = 0
+  // console.log("rerender")
   const quiz = allQuestions.map(question => (
       <Questions 
         {...question}
+        options= {randomise(question.correct_answer, question.incorrect_answers)}
         key={nanoid()}
         id={++id}
         checked={checked}
         selected={selected}
-        updateSelected={updateSelected}
+        update={updateSelected}
       />
       
   ))
@@ -80,7 +126,14 @@ export default function App() {
       :
       <div>
       {quiz}
-      <button onClick={checkAnswers}>Check answers</button>
+      {
+      checked === false ? 
+      <button onClick={checkAnswers}>Check answers</button> 
+      :
+      <h3> You got {score()}/5 correct answers <button onClick={restartPage}>Play again</button> </h3>
+      }
+      {/* {checked === true && 
+      <span> Refresh to try again!</span>} */}
       </div>
     }
     </div>
