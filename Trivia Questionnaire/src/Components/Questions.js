@@ -4,7 +4,6 @@ import {nanoid} from "nanoid"
 
 
 export default function Questions(props) {
-
     function htmlOptions(options) {
         options = options.map(option => {
             if (props.checked) {

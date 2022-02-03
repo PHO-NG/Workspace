@@ -38,23 +38,23 @@ export default function App() {
     
   }
 
+  function shuffle(array) {
+    array.sort(() => Math.random() - 0.5);
+  }
+
   function randomise(rightAnswer, options) {
-    if (options.includes(rightAnswer)) {
+    if (options.includes(rightAnswer) === false) {
+      options.push(rightAnswer)
+      //https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array#:~:text=209-,You,-can%20do%20it
+      if (options.length === 2) {
+        options = ["True", "False"]
+      } else {
+        shuffle(options)
+      }
+    } else {
       if (options.length === 2) {
         options = ["True", "False"]
       }
-      return options
-    } else {
-      options.push(rightAnswer)
-    //https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array#:~:text=209-,You,-can%20do%20it
-    if (options.length !== 2) {
-      options = options
-        .map(value => ({ value, sort: Math.random() }))
-        .sort((a, b) => a.sort - b.sort)
-        .map(({ value }) => value)
-    } else {
-      options = ["True", "False"]
-    }
     return options
     }
   }
@@ -99,7 +99,6 @@ export default function App() {
   }
 
   let id = 0
-  // console.log("rerender")
   const quiz = allQuestions.map(question => (
       <Questions 
         {...question}
@@ -132,8 +131,6 @@ export default function App() {
       :
       <h3> You got {score()}/5 correct answers <button onClick={restartPage}>Play again</button> </h3>
       }
-      {/* {checked === true && 
-      <span> Refresh to try again!</span>} */}
       </div>
     }
     </div>
