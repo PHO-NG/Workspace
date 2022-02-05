@@ -122,7 +122,7 @@ export default function App() {
       checked === false ? 
       <button className="check-answers" onClick={checkAnswers}>Check answers</button> 
       :
-      <h3 className="score"> You got {score()}/5 correct answers <button çonClick={restartPage}>Play again</button> </h3>
+      <h3 className="score"> You got {score()}/5 correct answers <button onClick={restartPage}>Play again</button> </h3>
       }
       </div>
     }

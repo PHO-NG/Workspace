@@ -5,7 +5,7 @@ export default function StartUp(props) {
             props.questions.length > 0 && 
             <div className="startup">
                 <h1 className="startup-title">Quizzical</h1>
-                <h3 className="startup-desc">Some description if needed</h3>
+                <h3 className="startup-desc">Play now to test your trivia knowledge!</h3>
                 <button className="startup-button" onClick={props.start}>Start Quiz</button> 
             </div>
     )
