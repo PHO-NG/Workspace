@@ -9,11 +9,8 @@ export default function App() {
   const [checked, setChecked] = React.useState(false)
   
   const [allQuestions, setAllQuestions] = React.useState([])
-  const [selected, setSelected] = React.useState([])
+  const [data, setData] = React.useState([])
   
-    
-//move questions here and send over to Questions.js via props, to remove randomisation on rerender.
-
   React.useEffect(() => {
     fetch("https://opentdb.com/api.php?amount=5")
         .then(res => res.json())
@@ -21,21 +18,20 @@ export default function App() {
   
   }, [])
 
-
   function checkAnswers() {
     let checkall = true
-    for (let i = 1; i <= selected.length; i++) {
-      if (selected.find(select => select.id === i).select === "") {
+    for (let i = 1; i <= data.length; i++) {
+      if (data.find(select => select.id === i).select === "") {
         checkall = false
         break
       }
     }
+
     if (checkall) {
       setChecked(true)
     } else {
       alert("Answer all questions to see solution")
     }
-    
   }
 
   function shuffle(array) {
@@ -43,9 +39,9 @@ export default function App() {
   }
 
   function randomise(rightAnswer, options) {
+
     if (options.includes(rightAnswer) === false) {
       options.push(rightAnswer)
-      //https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array#:~:text=209-,You,-can%20do%20it
       if (options.length === 2) {
         options = ["True", "False"]
       } else {
@@ -59,39 +55,36 @@ export default function App() {
     }
   }
 
-  function initialiseStated() {
-    for (let i = 1; i <= 5; i++) {
+  function initialiseData() {
+    for (let i = 1; i <= allQuestions.length; i++) {
       let temp = {
         id: i,
         select: "",
         correct: ""
       }
-      setSelected(prev => [temp, ...prev])
+      setData(prev => [...prev, temp])
     }
   }
 
-  function updateSelected(id, text, correct) {
-    setSelected(prev => prev.map(data => (
-      data.id === id ? { ...data, select:text, correct: correct} : data)
+  function updateSelected(id, selected, correct) {
+    setData(prev => prev.map(data => (
+      data.id === id ? { ...data, select: selected, correct: correct} : data)
     ))  
   }
-
   
   function score() {
     let mark = 0
     for (let i = 1; i <= allQuestions.length; i++) {
-
-      if (selected.find(question => question.id === i).correct === selected.find(chosen => chosen.id === i).select) {
+      if (data.find(question => question.id === i).correct === data.find(chosen => chosen.id === i).select) {
         mark++
       }
     }
-    console.log(allQuestions.length)
     return mark
   }
 
   function startQuiz() {
     setStart(prev => true)
-    initialiseStated()
+    initialiseData()
   }
 
   function restartPage() {
@@ -106,10 +99,9 @@ export default function App() {
         key={nanoid()}
         id={++id}
         checked={checked}
-        selected={selected}
+        selected={data}
         update={updateSelected}
       />
-      
   ))
 
   return (
@@ -120,16 +112,17 @@ export default function App() {
       <div> 
       <StartUp 
         start={startQuiz}
+        questions={allQuestions}
       />
       </div>
       :
-      <div>
+      <div className="question-container">
       {quiz}
       {
       checked === false ? 
-      <button onClick={checkAnswers}>Check answers</button> 
+      <button className="check-answers" onClick={checkAnswers}>Check answers</button> 
       :
-      <h3> You got {score()}/5 correct answers <button onClick={restartPage}>Play again</button> </h3>
+      <h3 className="score"> You got {score()}/5 correct answers <button çonClick={restartPage}>Play again</button> </h3>
       }
       </div>
     }
