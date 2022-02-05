@@ -5,6 +5,7 @@ import {nanoid} from "nanoid"
 
 export default function Questions(props) {
 
+    /*---TURNING JS INTO DOM ELEMENTS WITH STYLE DEPENDANCIES---*/
     function htmlOptions(options) {
         options = options.map(option => {
             let style = ""
@@ -35,6 +36,7 @@ export default function Questions(props) {
           return options
     }
     
+    /*---UPDATE USER DATA STATE---*/
     function updateAnswer(event) {
         props.update(props.id, event.target.innerText, props.correct_answer)
     }
@@ -43,8 +45,6 @@ export default function Questions(props) {
         <main className="question-box">
             <h2 className="question">{he.decode(props.question)}</h2>
             <div className="question-options">{htmlOptions(props.options)}</div>
-            {/* <h4>Correct answers: {props.correct_answer}</h4>
-            <h4>Selected answers: {props.selected.find(obj => obj.id === props.id).select}</h4> */}
             <hr />
         </main>
     )

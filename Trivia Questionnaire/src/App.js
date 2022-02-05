@@ -7,10 +7,12 @@ import Questions from "./Components/Questions"
 export default function App() {
   const [start, setStart] = React.useState(false)
   const [checked, setChecked] = React.useState(false)
-  
   const [allQuestions, setAllQuestions] = React.useState([])
+  
+  /*---DATA OF USERS SELECTED OPTIONS + CORRECT ANSWERS---*/
   const [data, setData] = React.useState([])
   
+  /*---COLLECT DATA FROM API---*/
   React.useEffect(() => {
     fetch("https://opentdb.com/api.php?amount=5")
         .then(res => res.json())
@@ -18,6 +20,7 @@ export default function App() {
   
   }, [])
 
+  /*---ONCE CALLED, CHECKS IF ALL QUESTIONS HAVE BEEN ATTEMPTED. IF SO, MARKS QUESTIONS---*/
   function checkAnswers() {
     let checkall = true
     for (let i = 1; i <= data.length; i++) {
@@ -34,12 +37,13 @@ export default function App() {
     }
   }
 
+  /*---SHUFFLE ALGORITHM---*/
   function shuffle(array) {
     array.sort(() => Math.random() - 0.5);
   }
 
+  /*---COMBINES CORRECT ANSWER WITH OTHER OPTIONS. THEN SHUFFLES THE ARRAY---*/
   function randomise(rightAnswer, options) {
-
     if (options.includes(rightAnswer) === false) {
       options.push(rightAnswer)
       if (options.length === 2) {
