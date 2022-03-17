@@ -5,5 +5,5 @@
 3. [Trivia Questionnaire](https://github.com/PHO-NG/CODE/tree/main/Trivia%20Questionnaire)
 
 Made implementing skills learnt from online courses:
-* [Udemy: The Complete 2022 Web Development Bootcamp](https://www.udemy.com/course/the-complete-web-development-bootcamp/) and 
+* [Udemy: The Complete 2022 Web Development Bootcamp](https://www.udemy.com/course/the-complete-web-development-bootcamp/)
 * [scrimba: Learn React for free](https://scrimba.com/learn/learnreact)
