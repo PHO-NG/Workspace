@@ -25,37 +25,54 @@ const Item = mongoose.model("Item", itemSchema);
 const List = mongoose.model("List", listSchema);
 
 const todo1 = new Item({
-  name: "Eat"
+  name: "New TodoList 🥳"
 });
 const todo2 = new Item({
-  name: "Work"
-});
-const todo3 = new Item({
-  name: "Sleep"
+  name: "← Click here to delete entry"
 });
 
-const tempList = [todo1, todo2, todo3];
+const tempList = [todo1, todo2];
+
+function displayList() {
+  const temp = [];
+  List.find({}, (err, results) => {
+    if (!err) {
+      results.forEach((list) => {
+        if (list.items.length === 0 && list.name != "Today") {
+          List.findOneAndDelete({name: list.name}, (err) => {
+            if (err) {
+              console.log(err)
+            }
+          })
+        }
+        allList.push(list.name)
+      })
+    }
+  })
+  return temp
+}
+
+let allList = displayList()
 
 app.get('/', (req, res) => {
-  Item.find({}, (err, results) => {
+  allList = displayList()
+  List.find({}, (err, results) => {
 
     if (results.length === 0) {
-      Item.insertMany(tempList, (err) => {
-        if (err) {
-          console.log(err);
-        } else {
-          console.log("Success!");
-        }
-      });
-      res.redirect("/");
+      const list = new List({
+        name: "Today",
+        items: tempList
+      })
+      list.save();
+      res.redirect('/');
     } else {
-      res.render('list', {listTitle: "Today", newListItems: results});
+      res.render('list', {listTitle: "Today", newListItems: results[0].items, allList: allList});
     }
   });
 });
 
 app.get('/:customName', (req,res) => {
-  
+  allList = displayList()
   const title = _.capitalize(req.params.customName);
 
   List.find({name: title}, (err,results) => {
@@ -65,56 +82,40 @@ app.get('/:customName', (req,res) => {
         items: tempList
       })
       list.save();
-  res.redirect("/" + title);
+      res.redirect('/' + title);
+    } else if (title === "Today") { 
+      res.redirect('/')
     } else {
-      res.render('list', {listTitle: title, newListItems: results[0].items});
+      res.render('list', {listTitle: title, newListItems: results[0].items, allList: allList});
     }
   })
 });
 
-app.post("/", (req, res) => {
+app.post('/', (req, res) => {
 
   const itemName = req.body.newItem;
   const listName = _.capitalize(req.body.list);
 
   const newItem = new Item({name: itemName});
-
-  if (listName === "Today") {
-    newItem.save();
-    res.redirect('/');
-  } else {
-    List.find({name: listName}, (err, results) => {
-        results[0].items.push(newItem);
-        results[0].save();
-        res.redirect('/' + listName);
-    })
-  }
+  List.find({name: listName}, (err, results) => {
+      results[0].items.push(newItem);
+      results[0].save();
+      res.redirect('/' + listName);
+  })
 });
 
-app.post("/delete", (req,res) => {
+app.post('/delete', (req,res) => {
 
   const listName = _.capitalize(req.body.listName);
   const checkedItemId = req.body.checkbox;
-
-  if (listName === "Today") {
-    Item.deleteOne({_id: checkedItemId}, (err) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.redirect('/');
-      }
-    });
-    
-  } else {
-    List.findOneAndUpdate({name: listName}, {$pull: {items: {_id: checkedItemId}}}, (err, result) => {
-      if (!err) {
-        res.redirect('/' + listName);
-      }
-    });
-  }
+  List.findOneAndUpdate({name: listName}, {$pull: {items: {_id: checkedItemId}}}, (err, result) => {
+    if (!err) {
+      res.redirect('/' + listName);
+    }
+  });
 });
 
-app.get("/about", (req,res) => {
+app.get('/about', (req,res) => {
   res.render("about");
 });
 
@@ -125,3 +126,10 @@ if (port === "NULL" || port === "" || !port) {
 app.listen(port, () => {
   console.log("Server started on port " + port);
 });
+
+
+/* -- TODO -- 
+  1. COMBINE TODAY'S LIST TO LIST MODEL ✅
+  2. SHOW ALL LIST ON SIDE
+  3. MAKE ALL LIST CLICKABLE
+*/
