@@ -1,7 +1,17 @@
 <%- include("header") -%>
 
   <div class="box" id="heading">
-    <h1> <%= listTitle %> </h1>
+    <h1> <%= listTitle %>   <i class="fa fa-regular fa-caret-right"></i></h1>
+  </div>
+
+  <div class="allList">
+
+    <h2>Other Todolist</h2>
+    <% allList.forEach((list) => { %>
+      <div class="allListItems">
+        <a href="/<%=list%>"> <%= list %> </a>
+      </div>
+    <% }) %>
   </div>
 
   <div class="box">
@@ -20,14 +30,6 @@
         <input type="text" name="newItem" placeholder="New Item" autocomplete="off">
         <button type="submit" name="list" value="<%= listTitle %>">+</button>
       </form>
-  </div>
-
-  <div>
-    <% allList.forEach((list) => { %>
-      <div>
-        <p> <%= list %> </p>
-      </div>
-    <% }) %>
   </div>
 
 <%- include("footer") -%>

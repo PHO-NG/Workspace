@@ -6,8 +6,14 @@ html {
 }
 
 h1 {
-  color: #fff;
+  color: white;
   padding: 10px;
+}
+
+h2 {
+  color: #A683E3;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .box {
@@ -16,11 +22,37 @@ h1 {
   background: white;
   border-radius: 5px;
   box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
+  /* z-index: 1; */
 }
 
 #heading {
   background-color: #A683E3;
   text-align: center;
+}
+
+.fa-caret-right {
+  position: relative;
+  left: 34%;
+  color: white;
+}
+
+.allList {
+  position: fixed;
+  left: 67%;
+  top: 6%; 
+  max-width: 200px;
+  margin: 5px auto;
+}
+
+.allListItems > a {
+  padding: 0;
+  margin: 0;
+  text-decoration: none;
+  color: white;
+}
+
+a:hover {
+  color:#A683E3;
 }
 
 .item {
@@ -31,7 +63,7 @@ h1 {
 }
 
 .item:last-child {
-  border-bottom: 0;
+  border-bottom: none;
 }
 
 input:checked+p {
