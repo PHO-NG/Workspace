@@ -4,6 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const _ = require('lodash');
+const async = require('async')
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -33,8 +34,10 @@ const todo2 = new Item({
 
 const tempList = [todo1, todo2];
 
+let allList = []
+
 function displayList() {
-  const temp = [];
+  const temp = []
   List.find({}, (err, results) => {
     if (!err) {
       results.forEach((list) => {
@@ -45,17 +48,17 @@ function displayList() {
             }
           })
         }
-        allList.push(list.name)
+        temp.push(list.name)
       })
     }
   })
   return temp
 }
 
-let allList = displayList()
+
 
 app.get('/', (req, res) => {
-  allList = displayList()
+  
   List.find({}, (err, results) => {
 
     if (results.length === 0) {
@@ -66,7 +69,10 @@ app.get('/', (req, res) => {
       list.save();
       res.redirect('/');
     } else {
-      res.render('list', {listTitle: "Today", newListItems: results[0].items, allList: allList});
+      (async () => {
+        allList = await displayList()
+      }).call(res.render('list', {listTitle: "Today", newListItems: results[0].items, allList: allList}))
+      
     }
   });
 });
@@ -86,7 +92,11 @@ app.get('/:customName', (req,res) => {
     } else if (title === "Today") { 
       res.redirect('/')
     } else {
-      res.render('list', {listTitle: title, newListItems: results[0].items, allList: allList});
+      (async () => {
+        allList = await displayList()
+      }).call(res.render('list', {listTitle: title, newListItems: results[0].items, allList: allList}))
+      
+      
     }
   })
 });
