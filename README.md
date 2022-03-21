@@ -1,5 +1,5 @@
 # TODO 
-- Clean up TodoList (i.e. README, comments)
+- Clean up TodoList (i.e. README, comments) ✅
 - Add more to Secrets
 - Clean up Secrets
 - For all projects, in README, list key skills learnt from doing each one
