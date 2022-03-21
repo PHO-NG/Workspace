@@ -4,7 +4,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const _ = require('lodash');
-const async = require('async')
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -55,7 +54,9 @@ function displayList() {
   return temp
 }
 
-
+function checkIfNotEmpty() {
+  return (allList.length > 0)
+}
 
 app.get('/', (req, res) => {
   
@@ -69,10 +70,13 @@ app.get('/', (req, res) => {
       list.save();
       res.redirect('/');
     } else {
-      (async () => {
-        allList = await displayList()
-      }).call(res.render('list', {listTitle: "Today", newListItems: results[0].items, allList: allList}))
-      
+      allList = displayList()
+      let check = setInterval(() => {
+        if (checkIfNotEmpty()) {
+          clearInterval(check)
+          res.render('list', {listTitle: "Today", newListItems: results[0].items, allList: allList})
+        }
+      }, 100)
     }
   });
 });
@@ -92,11 +96,13 @@ app.get('/:customName', (req,res) => {
     } else if (title === "Today") { 
       res.redirect('/')
     } else {
-      (async () => {
-        allList = await displayList()
-      }).call(res.render('list', {listTitle: title, newListItems: results[0].items, allList: allList}))
-      
-      
+      allList = displayList()
+      let check = setInterval(() => {
+        if (checkIfNotEmpty()) {
+          clearInterval(check)
+          res.render('list', {listTitle: title, newListItems: results[0].items, allList: allList}) 
+        }
+      }, 100)     
     }
   })
 });
@@ -136,10 +142,3 @@ if (port === "NULL" || port === "" || !port) {
 app.listen(port, () => {
   console.log("Server started on port " + port);
 });
-
-
-/* -- TODO -- 
-  1. COMBINE TODAY'S LIST TO LIST MODEL ✅
-  2. SHOW ALL LIST ON SIDE
-  3. MAKE ALL LIST CLICKABLE
-*/
