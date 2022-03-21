@@ -12,6 +12,11 @@
         <a href="/<%=list%>"> <%= list %> </a>
       </div>
     <% }) %>
+    <div class="newList">
+      <form action="/new" method="post">
+        <input type="text" name="newList" placeholder="New list?" autocomplete="off">
+      </form>
+    </div>
   </div>
 
   <div class="box">

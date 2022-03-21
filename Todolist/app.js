@@ -107,6 +107,10 @@ app.get('/:customName', (req,res) => {
   })
 });
 
+app.post('/new', (req,res) => {
+  res.redirect('/' + req.body.newList)
+})
+
 app.post('/', (req, res) => {
 
   const itemName = req.body.newItem;
