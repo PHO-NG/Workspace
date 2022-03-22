@@ -6,7 +6,7 @@
 4. [TodoList](https://github.com/PHO-NG/CODE/tree/main/Todolist) (Express EJS)
 5. [Secrets](https://github.com/PHO-NG/CODE/tree/main/Secrets) (Express EJS)
 
-## Other Projects (Introduction projects)
+### Other Projects (Introduction projects)
 1. [TinDog](https://github.com/PHO-NG/CODE/tree/main/TinDog)
 2. [Drum Kit](https://github.com/PHO-NG/CODE/tree/main/Drum%20Kit) 
 
