@@ -4,7 +4,12 @@ Roll 10 dice until they are all the same.
 
 HTML/CSS/JS (React emphasis)
 
-Project from [scrimba: Learn React for free](https://scrimba.com/learn/learnreact), with extra self-imposed functionalities.
+Project from [scrimba: Learn React for free](https://scrimba.com/learn/learnreact), with extra self-imposed functionalities including:
+ - Replace help text with a popup to clear space on the website, improving website design.
+ - Add a counter to how many attempts the user has done before winning.
+
+ ## Key Skills learnt
+  - Basic React principles and, when and how to implement them correctly.
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 

@@ -1,8 +1,12 @@
-# Drum Kit Starting Files
+# Drum Kit
 
-Basic website implementing the use of sound and event-listeners 
+Audible website of a drum kit
 
 HTML/CSS/JS
+
+## Key skills learnt
+ - Implementing sound and event-listeners
+ - Basic HTML and CSS functionalities
 
 Project from [Udemy: The Complete 2022 Web Development Bootcamp](https://www.udemy.com/course/the-complete-web-development-bootcamp/)
 
