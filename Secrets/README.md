@@ -12,10 +12,10 @@ Project from [Udemy: The Complete 2022 Web Development Bootcamp](https://www.ude
  
 ## Key skills learnt
  - Implementing different type of security and authorisation measures. This includes:
-    > Encrpyting and decrpyting user passwords (**encryption**)
-    > Hashing passwords (**md5**)
-    > Hashing AND salting passwords (**bcrypt**)
-    > Cookies and using 3rd party security systems e.g. Google (**Passportjs**)
+    - Encrpyting and decrpyting user passwords (**encryption**)
+    - Hashing passwords (**md5**)
+    - Hashing AND salting passwords (**bcrypt**)
+    - Cookies and using 3rd party security systems e.g. Google (**Passportjs**)
  - Implementing the use of databases into projects using **Mongoose** and **MongoDB**.
 
  ## Difficulties and how I overcame them
