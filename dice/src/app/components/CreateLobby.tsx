@@ -3,31 +3,32 @@ import React from 'react'
 
 export default function CreateLobby() {
   return (
-    <form>
-        <label htmlFor="room-name">Room name:</label>
-        <input type="text" id="room-name" name="room-name" />
+    <form className='flex flex-col mx-96'>
+      <div className='flex mx-5 my-2 w-auto'>
+        <label className='text-3xl mr-5 whitespace-nowrap' htmlFor="room-name">ROOM NAME:</label>
+        <input className='text-3xl bg-black border-2 w-96' type="text" id="room-name" name="room-name" />
+      </div>
 
-        <label htmlFor="initial">Initial Amount:</label>
-        <input type="range" id="initial" name="initial" list="markers"/>
-        <datalist id="markers">
-          <option value="0">Dynamic</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-          <option value="6">6</option>
-        </datalist>
+      <div className='flex px-5 py-2 bg-darkgray'>
+        <label className='text-3xl whitespace-nowrap' htmlFor="initial">INITIAL AMOUNT:</label>
+          <input className='m-auto' type="range" id="initial" name="initial" min="0" max="6" step="1"/>
+      </div>
 
-        <label htmlFor="reroll">Re-roll dice:</label>
-        <input type="checkbox" id="reroll" name="reroll" checked />
+      <div className='flex mx-5 my-2'>
+        <label className='text-3xl mr-5' htmlFor="reroll">RE-ROLL DICE:</label>
+        <input type="checkbox" id="reroll" name="reroll"/>
+      </div>
 
-        <label htmlFor="spectators">Spectators:</label>
+      <div className='flex px-5 py-2 bg-darkgray'>
+        <label className='text-3xl mr-6' htmlFor="spectators">SPECTATORS:</label>
         <input type="checkbox" id="spectators" name="spectators" />
-        
-        <label htmlFor="invite">Open invite:</label>
-        <input type="checkbox" id="invite" name="invite" />
+      </div>
 
-        <button type="submit">Create Lobby</button>
+      <div className='flex mx-5 my-2'>
+        <label className='text-3xl mr-7' htmlFor="invite">OPEN INVITE:</label>
+        <input type="checkbox" id="invite" name="invite" />
+      </div>
+      <button className='text-3xl' type="submit">CREATE LOBBY</button>
     </form>
   )
 }

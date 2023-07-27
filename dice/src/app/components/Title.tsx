@@ -14,7 +14,7 @@ export default function Title() {
             priority={true}
         />
         
-        <h1 className="p-20 w-90 text-9xl relative text-center tracking-[5%] ">Liar’s Dice</h1>
+        <h1 className="p-20 w-90 text-9xl relative text-center tracking-[5%] whitespace-nowrap">Liar’s Dice</h1>
         
     </section>
   )

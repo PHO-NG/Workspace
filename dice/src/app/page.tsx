@@ -21,7 +21,7 @@ export default function Home() {
           </div>
           :
           <>
-            <button onClick={() => setInitiate(false)}>Back</button>
+            <button className="absolute top-3 left-3" onClick={() => setInitiate(false)}>BACK</button>
             <CreateLobby />
           </>
         }
