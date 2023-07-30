@@ -1,6 +1,10 @@
 /* eslint-disable react/no-unescaped-entities */
+import './styles.css'
 import React from 'react'
 import Image from "next/image"
+
+// import localFont from 'next/font/local'
+// const windlass = localFont({ src: "/Windlass.ttf" })
 
 export default function Title() {
   return (

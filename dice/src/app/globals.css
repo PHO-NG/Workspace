@@ -2,26 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-h1 {
-  font-family: "windlass", sans-serif;
-  background-color: #FFFFFF;
-  text-shadow: -6px -5px 4px #00000071;
-  color: transparent;
-  -webkit-background-clip: text;
-     -moz-background-clip: text;
-          background-clip: text;
-}
-
-.button {
-  border: 3px red solid;
-}
-
-
 input[type="range"] {
-  
   -webkit-appearance: none;
-  width: 700px;
-  height: 5px;
+  height: 3px;
   border-radius: 5px;
   background: #434343;
   outline: none;
@@ -35,15 +18,30 @@ input[type="range"]:hover {
 }
 
 input[type="range"]::-webkit-slider-thumb {
+  margin-bottom: 15px;
   -webkit-appearance: none;
   appearance: none;
-  width: 25px;
-  height: 25px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #54000E;
-  opacity: 1;
   cursor: pointer;
 }
+
+datalist {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  writing-mode: vertical-lr;
+  width: 100%;
+}
+
+option {
+  padding: 0;
+  /* border: 2px white solid; */
+  transform: rotate(-90deg);
+}
+
 
 input[type="checkbox"] {
   width: 25px;

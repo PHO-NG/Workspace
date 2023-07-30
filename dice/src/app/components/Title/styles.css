@@ -1,0 +1,9 @@
+h1 {
+    font-family: "windlass", sans-serif;
+    background-color: #FFFFFF;
+    text-shadow: -6px -5px 4px #00000071;
+    color: transparent;
+    -webkit-background-clip: text;
+       -moz-background-clip: text;
+            background-clip: text;
+  }
