@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <main >
       <Title />
-      {/* <Settings /> */}
+      {/* <UserSettings /> */}
       <div>
         {
           initiate === false

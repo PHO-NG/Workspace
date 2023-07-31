@@ -4,6 +4,11 @@ import Title from '../components/Title/Title'
 import Link from 'next/link'
 import LobbyCard from '../components/LobbyCard'
 
+type Props = {
+  icon: string,
+  size: number,
+}
+
 
 export default function Home() {
   const [lobbySettings, setLobbySettings] = React.useState({
@@ -15,19 +20,29 @@ export default function Home() {
     inviteLink: "TEST",
   })
 
-  const [playerList, setPlayerList] = React.useState([{
-    name: "",
-    id: 0,
-  }])
+  const [playerList, setPlayerList] = React.useState(Array(6).fill({
+    name: "OPEN",
+    ready: false,
+    icon: "",
+    host: false
+  }))
 
-  // const lobby = playerList.map((player, index) => (
-  //   <LobbyCard 
-  //     {...player}
-  //     key={index}
-  //   />
-  // )
+  setPlayerList(list => [...list, {
+    name: "OPEN",
+    ready: false,
+    icon: "",
+    host: false
+  }])
+  
+
+  const lobby = playerList.map((player, index) => (
+    <LobbyCard 
+      {...player}
+      key={index}
+    />
+  )
     
-  // )
+  )
 
   return (
     <main >

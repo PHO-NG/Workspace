@@ -15,4 +15,4 @@ export async function POST(request: Request) {
     const { lobbyName, initialAmount, reroll, spectators, openLobby } = data
 
     return NextResponse.json({ lobbyName, initialAmount, reroll, spectators, openLobby })
-}
+}8

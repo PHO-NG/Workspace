@@ -19,8 +19,11 @@ export default function LobbyCard({params: {name, icon, readyStatus, host, fille
     <div className='h-16'>
         <div>
             {filled == true && 
-            // <Icon info = {icon}/>
-            "TEMP"
+            <Icon 
+                icon={icon}
+                size={70}
+            />
+
             }
         </div>
         {filled ?
