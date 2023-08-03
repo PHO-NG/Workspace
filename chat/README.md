@@ -1,5 +1,4 @@
 ## BUTTON COMPONENT
-
 `npm i class-variance-authority`
 Define variance of an element
 
@@ -32,3 +31,10 @@ next auth redis adapter: used to put user data will be put into the database aut
 
 `session: {strategy: 'jwt',}`
 JSON web tokens: we dont handle the session on the dataase so we can verify the session in middleware to protect our routes
+
+## FORMS
+`npm i react-hook-form @hookform/resolvers zod axios`
+- `react-hook-forms` library to handle forms easier
+- `@hookform/resolvers`
+- `zod` Find schemas to validate user inputs. 
+- `axios` to make the fetch request
