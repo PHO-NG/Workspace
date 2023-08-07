@@ -1,38 +1,62 @@
 /* eslint-disable react/no-unescaped-entities */
 'use client'
-import {useState, useEffect } from 'react'
+import { FC, useState, useEffect, FormEvent, ChangeEvent, MouseEventHandler } from 'react'
+import { io } from 'socket.io-client'
 import Icon from '../components/PlayerIcons'
+import { redirect, useRouter } from 'next/navigation';
 
-export default function CreateLobby() {
-  const [counter, setCounter] = useState(0);
+const socket = io('http://localhost:3001')
+
+interface PageProps {
+  hostid: string
+}
+
+
+const CreateLobby: FC<PageProps> = ({ hostid }) => {
+  const router = useRouter()
+  const [counter, setCounter] = useState(0)
+  const [host, setHost] = useState<Player>({
+    id: hostid,
+    name: "Host",
+    icon: "8"
+  })
 
   const [data, setData] = useState({
-    lobbyName: "",
+    lobbyName: "Host Room",
     initialAmount: 1,
-    reroll: true, 
-    spectators: true, 
-    openLobby: true,
-    host: {
-      name: "Host",
-      icon: "/crew1.png",
-    }
+    reroll: false, 
+    spectator: false, 
+    openLobby: false,
+    host: host
   })
 
   useEffect(() => {
-    setData( prev => ({...prev, host: {...prev.host, icon: "/crew" + ((Math.abs(5 * counter) % 6 ) + 1) + ".png"}}))
+    setHost(prev => ({...prev, icon: "/crew" + ((Math.abs(5 * counter) % 6 ) + 1) + ".png"}))
   }, [counter])
 
+  useEffect(() => {
+    setData( prev => ({...prev, host: host}))
+  }, [host])
 
-  const handleSubmit = (e: any) => {
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setData(prev => ({
-      lobbyName: e.target[0].value,
-      initialAmount: e.target[1].value === 1 ? "Dynamic" : e.target[1].value,
-      reroll: e.target[2].value, 
-      spectators: e.target[3].value, 
-      openLobby: e.target[4].value,
-      host: prev.host
-    }))
+    socket.emit('create-room', data)
+    router.push(`/lobby/${hostid}`)
+  }
+
+  const handleChange = (e: MouseEventHandler<HTMLInputElement> | any ) => {
+    if (e.target.type === "checkbox") {
+      setData(prev => ({
+        ...prev, 
+        [e.target.name] : e.target.checked,
+      }))
+    } else {
+      setData(prev => ({
+        ...prev, 
+        [e.target.name] : e.target.value,
+      }))
+    }
   }
 
   return (
@@ -48,20 +72,22 @@ export default function CreateLobby() {
         </div>
         <label className='text-3xl whitespace-nowrap mx-auto' htmlFor="nickName">NICKNAME:</label>
         <input className='text-3xl border-white mx-auto opacity-80 bg-black border-2 w-[60%] focus:outline-none focus:opacity-100' autoComplete="off" type="text" value={data.host.name} 
-          onChange={(e) => setData( prev => ({...prev, host: {...prev.host, name: e.target.value}}))}
+          onChange={(e) => setHost( prev => ({...prev, name: e.target.value}))}
         />
       </div>
 
       <form className='flex flex-col mr-[20%] w-8/12' onSubmit={handleSubmit}>
         <div className='flex mx-5 my-2 w-auto'>
           <label className='text-3xl mr-10 whitespace-nowrap' htmlFor="lobbyName">ROOM NAME:</label>
-          <input className='text-3xl border-white opacity-80 bg-black border-2 w-[60%] focus:outline-none focus:opacity-100' type="text" id="lobbyName" autoComplete="off" name="lobbyName" />
+          <input className='text-3xl border-white opacity-80 bg-black border-2 w-[60%] focus:outline-none focus:opacity-100 pl-3' 
+          onChange={handleChange}
+          autoFocus type="text" id="lobbyName" autoComplete="off" name="lobbyName" />
         </div>
 
         <div className='flex px-5 bg-darkgray'>
           <label className='text-3xl whitespace-nowrap mt-3' htmlFor="initialAmount">INITIAL AMOUNT:</label>
           <div className='w-7/12 ml-10'>
-          <input className='ml- w-11/12' type="range" id="initialAmount" name="initialAmount" min="1" max="6" step="1" defaultValue="1" list="markers"/>
+          <input className='ml- w-11/12' onChange={handleChange} type="range" id="initialAmount" name="initialAmount" min="1" max="6" step="1" defaultValue="1" list="markers"/>
 
             <datalist className='-my-4 ml-7 w-11/12' id="markers">
               <option className="relative right-7" value="1" label='Dynamic'></option>
@@ -76,17 +102,17 @@ export default function CreateLobby() {
 
         <div className='flex mx-5 my-2'>
           <label className='text-3xl mr-5' htmlFor="reroll">RE-ROLL DICE:</label>
-          <input className='hover:none' type="checkbox" id="reroll" name="reroll"/>
+          <input className='hover:none' onClick={handleChange} type="checkbox" id="reroll" name="reroll"/>
         </div>
 
         <div className='flex px-5 py-2 bg-darkgray'>
-          <label className='text-3xl mr-6' htmlFor="spectators">SPECTATORS:</label>
-          <input type="checkbox" id="spectators" name="spectators" />
+          <label className='text-3xl mr-6' htmlFor="spectator">SPECTATORS:</label>
+          <input type="checkbox" onClick={handleChange} id="spectator" name="spectator" />
         </div>
 
         <div className='flex mx-5 my-2'>
           <label className='text-3xl mr-7' htmlFor="openLobby">OPEN INVITE:</label>
-          <input type="checkbox" id="openLobby" name="openLobby" />
+          <input type="checkbox" onClick={handleChange} id="openLobby" name="openLobby" />
         </div>
         <button className='text-3xl border-red border-8 rounded-lg w-64 m-auto py-3' type="submit">CREATE LOBBY</button>
       </form>
@@ -94,3 +120,5 @@ export default function CreateLobby() {
     
   )
 }
+
+export default CreateLobby

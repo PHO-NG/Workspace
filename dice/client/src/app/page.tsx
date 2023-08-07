@@ -2,11 +2,22 @@
 import React from 'react'
 import './globals.css'
 import Link from 'next/link'
-import Title from './components/Title/Title';
-import CreateLobby from './components/CreateLobby';
+import { io } from 'socket.io-client'
+import Title from '@/components/Title/Title';
+import CreateLobby from '../components/CreateLobby';
+
+const socket = io('http://localhost:3001')
 
 export default function Home() {
   const [initiate, setInitiate] = React.useState(false)
+  const [hostId, setHostId] = React.useState("")
+
+  socket.on("get-hostId", (arg) => {
+    setHostId(arg)
+  })
+
+
+
 
   return (
     <main >
@@ -23,7 +34,7 @@ export default function Home() {
           :
           <>
             <button className="absolute top-3 left-3" onClick={() => setInitiate(false)}>BACK</button>
-            <CreateLobby />
+            <CreateLobby hostid={hostId} />
           </>
         }
       </div>

@@ -5,18 +5,21 @@ import Image from 'next/image'
 type Props = {
   icon: string,
   size: number,
+  styles?: string
 }
 
-export default function PlayerIcons({icon, size}: Props) {
+export default function PlayerIcons({icon, size, styles}: Props) {
 
   return (
     <Image 
       src={icon}
-      className=''
+      className={styles}
       width={size}
       height={size}
       alt={icon}
       priority={true}
+      placeholder="blur"
+      blurDataURL={'/crew1.png'}
     />
   )
 }
