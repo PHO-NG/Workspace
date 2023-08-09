@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react'
 import Icon from './PlayerIcons'
+import { Loader2 } from 'lucide-react'
 
 
 type Props = {
@@ -9,22 +10,29 @@ type Props = {
     ready: boolean,
     host: boolean,
     filled: boolean,
+    loaded: boolean
 }
 
-export default function LobbyCard({name, icon, ready, host, filled}: Props) {
+
+
+export default function LobbyCard({name, icon, ready, host, filled, loaded}: Props) {
   return (
     <div className='flex h-14 my-2'>
         <div className='-mt-1 relative '>
             {filled == true && 
-            <Icon 
-                icon={icon}
-                size={70}
-            />}
+                (loaded == true ?
+                <Icon 
+                    icon={icon}
+                    size={70}
+                />
+                :
+                <Loader2 size={70} className='animate-spin' />)
+            }
         </div>
 
         {filled ?
         <div className='flex w-full'>
-            <div className={`w-3 h-full mx-3 ${ready ? 'bg-green' : 'bg-lightgray'}`}></div>   
+            <div className={`w-3 h-full mx-3 ${ready || host ? 'bg-green' : 'bg-lightgray'}`}></div>   
             {host == true &&
             <Icon 
                 icon="/host.png"
@@ -32,7 +40,7 @@ export default function LobbyCard({name, icon, ready, host, filled}: Props) {
                 styles='fixed ml-9 -mt-4'
             />
             }
-            <div className={`w-full h-full ${ready ? "bg-darkgray" : "bg-gray"}`}>
+            <div className={`w-full h-full ${ready || host ? "bg-[#2323237e]" : "bg-gray"}`}>
                 <h2 className='text-5xl my-1 ml-3'>{name}</h2>
             </div>
         </div>

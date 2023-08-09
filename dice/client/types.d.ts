@@ -4,12 +4,21 @@ type Player = {
     icon: string
 }
 
+type PlayerStatus = Player & {
+    ready: boolean
+    host: boolean
+    position: number
+    filled: boolean
+    loaded?: boolean
+  }
+
 type Lobby = {
-     lobbyName: string
-     initialAmount: number
-     host: Player
-     openLobby: boolean
-     spectator: boolean
-     reroll: boolean
-     playerList?: Player[]
+    lobbyId: string
+    lobbyName: string
+    initialAmount: number
+    host: PlayerStatus
+    openLobby: boolean
+    spectator: boolean
+    reroll: boolean
+    playerList?: PlayerStatus[]
 }

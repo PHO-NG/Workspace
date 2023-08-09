@@ -1,28 +1,36 @@
 'use client'
 import React from 'react'
-import './globals.css'
+
 import Link from 'next/link'
 import { io } from 'socket.io-client'
+import CreateLobby from '@/components/CreateLobby';
 import Title from '@/components/Title/Title';
-import CreateLobby from '../components/CreateLobby';
+import './globals.css'
 
-const socket = io('http://localhost:3001')
+
+
+const socket = io('http://localhost:3001', {
+  transports: ["websocket", "polling"]
+})
 
 export default function Home() {
   const [initiate, setInitiate] = React.useState(false)
-  const [hostId, setHostId] = React.useState("")
+  const [gameId, setGameId] = React.useState("")
 
-  socket.on("get-hostId", (arg) => {
-    setHostId(arg)
+  socket.on("get-userId", (arg) => {
+    setGameId(arg)
+
+    return (
+      socket.off("get-userId")
+    )
   })
 
-
-
-
+ 
   return (
-    <main >
-      <Title />
+    <main>
+      {/* <Title /> */}
       {/* <UserSettings /> */}
+      
       <div>
         {
           initiate === false
@@ -34,12 +42,10 @@ export default function Home() {
           :
           <>
             <button className="absolute top-3 left-3" onClick={() => setInitiate(false)}>BACK</button>
-            <CreateLobby hostid={hostId} />
+            <CreateLobby gameId={gameId} socket={socket}/>
           </>
         }
       </div>
-      
-      
     </main>
   )
 }

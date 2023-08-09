@@ -1,33 +1,36 @@
 /* eslint-disable react/no-unescaped-entities */
 'use client'
-import { FC, useState, useEffect, FormEvent, ChangeEvent, MouseEventHandler } from 'react'
-import { io } from 'socket.io-client'
+import { FC, useState, useEffect, FormEvent, MouseEventHandler } from 'react'
 import Icon from '../components/PlayerIcons'
-import { redirect, useRouter } from 'next/navigation';
-
-const socket = io('http://localhost:3001')
+import { useRouter } from 'next/navigation';
+import { Socket } from 'socket.io-client'
 
 interface PageProps {
-  hostid: string
+  gameId: string
+  socket: Socket 
 }
 
-
-const CreateLobby: FC<PageProps> = ({ hostid }) => {
+const CreateLobby: FC<PageProps> = ({ gameId, socket }) => {
   const router = useRouter()
   const [counter, setCounter] = useState(0)
-  const [host, setHost] = useState<Player>({
-    id: hostid,
+  const [host, setHost] = useState<PlayerStatus>({
+    id: "",
     name: "Host",
-    icon: "8"
+    icon: "",
+    ready: false,
+    host: true,
+    position: 1,
+    filled: true
   })
 
-  const [data, setData] = useState({
+  const [lobby, setLobby] = useState({
+    lobbyId: gameId,
     lobbyName: "Host Room",
     initialAmount: 1,
-    reroll: false, 
-    spectator: false, 
+    host: host,
     openLobby: false,
-    host: host
+    spectator: false, 
+    reroll: false
   })
 
   useEffect(() => {
@@ -35,24 +38,24 @@ const CreateLobby: FC<PageProps> = ({ hostid }) => {
   }, [counter])
 
   useEffect(() => {
-    setData( prev => ({...prev, host: host}))
+    setLobby( prev => ({...prev, host: host}))
   }, [host])
 
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    socket.emit('create-room', data)
-    router.push(`/lobby/${hostid}`)
+    socket.emit('create-room', lobby)
+    router.push(`/lobby/${gameId}` )
   }
 
   const handleChange = (e: MouseEventHandler<HTMLInputElement> | any ) => {
     if (e.target.type === "checkbox") {
-      setData(prev => ({
+      setLobby(prev => ({
         ...prev, 
         [e.target.name] : e.target.checked,
       }))
     } else {
-      setData(prev => ({
+      setLobby(prev => ({
         ...prev, 
         [e.target.name] : e.target.value,
       }))
@@ -71,7 +74,7 @@ const CreateLobby: FC<PageProps> = ({ hostid }) => {
           <button className='text-red text-7xl mx-5 font-bold' onClick={() => setCounter(count => count + 1)}>{">"}</button>
         </div>
         <label className='text-3xl whitespace-nowrap mx-auto' htmlFor="nickName">NICKNAME:</label>
-        <input className='text-3xl border-white mx-auto opacity-80 bg-black border-2 w-[60%] focus:outline-none focus:opacity-100' autoComplete="off" type="text" value={data.host.name} 
+        <input className='text-3xl border-white mx-auto opacity-80 bg-black border-2 w-[60%] focus:outline-none focus:opacity-100' autoComplete="off" type="text" value={host.name} 
           onChange={(e) => setHost( prev => ({...prev, name: e.target.value}))}
         />
       </div>
@@ -114,10 +117,10 @@ const CreateLobby: FC<PageProps> = ({ hostid }) => {
           <label className='text-3xl mr-7' htmlFor="openLobby">OPEN INVITE:</label>
           <input type="checkbox" onClick={handleChange} id="openLobby" name="openLobby" />
         </div>
+        
         <button className='text-3xl border-red border-8 rounded-lg w-64 m-auto py-3' type="submit">CREATE LOBBY</button>
       </form>
     </div>
-    
   )
 }
 

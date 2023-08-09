@@ -18,7 +18,7 @@ export default function PlayerIcons({icon, size, styles}: Props) {
       height={size}
       alt={icon}
       priority={true}
-      placeholder="blur"
+      placeholder={size > 40 ? "blur" : "empty"}
       blurDataURL={'/crew1.png'}
     />
   )
