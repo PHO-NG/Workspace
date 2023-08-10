@@ -6,7 +6,6 @@ type Player = {
 
 type PlayerStatus = Player & {
     ready: boolean
-    host: boolean
     filled: boolean
     loaded: boolean
   }
@@ -15,7 +14,6 @@ type Lobby = {
     lobbyId: string
     lobbyName: string
     initialAmount: number
-    host: PlayerStatus
     openLobby: boolean
     spectator: boolean
     reroll: boolean

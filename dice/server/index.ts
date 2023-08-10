@@ -20,7 +20,6 @@ type Lobby = {
     lobbyId: string
     lobbyName: string
     initialAmount: number
-    host: Player
     openInvite: boolean
     spectator: boolean
     reroll: boolean
@@ -36,24 +35,21 @@ io.on('connection',  (socket) => {
     socket.emit('get-userId', (socket.id))
     /* ---- LOBBY SETTINGS ---- */
     
-    socket.on('create-room', (lobby) => {
-        lobbyData.push(lobby)
+    socket.on('create-room', (lobby, host) => {
+        lobbyData.push(lobby, host)
     })
     
     socket.on('initilise-hostId', (lobbyId) => {
         socket.join(lobbyId)
         // Find lobbyId in array full of lobbyIds (host should always find one)
         const lobbyIndex = lobbyData.findIndex(lobby => lobby.lobbyId = lobbyId)
-        let check = ""
         if (lobbyIndex != -1) {
             console.log("IM THE HOST NOW")
-            socket.emit('initilise-lobby-host', lobbyData[lobbyIndex], socket.id, (response: string) => {
-                check = response
-            })
+            socket.emit('initilise-lobby-host', lobbyData[lobbyIndex], socket.id)
             lobbyData.splice(lobbyIndex, 1)
         } else { //lobby has host already
             console.log("IM A PLAYER")
-            socket.timeout(2000).broadcast.to(lobbyId).emit('initilise-lobby-player')
+            socket.broadcast.to(lobbyId).emit('initilise-lobby-player')
         }
     });
 

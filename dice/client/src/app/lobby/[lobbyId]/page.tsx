@@ -23,26 +23,22 @@ const Page: FC = () => {
 
   /* ---- GET RID OF RERENDERING BUG ---- */
   const [text, setText] = useState({
-    button: "",
+    // button: "",
     reroll: "",
   })
 
   /* ---- INITILISE LOBBY + HOST ---- */
   useEffect(() => {
-    console.log("FIRST")
     socket.emit('initilise-hostId', lobbyId)
-    socket.on('initilise-lobby-host', (lobbyData : Lobby, hostId : string, callback) => {
+    socket.on('initilise-lobby-host', (lobbyData : Lobby, host : Player, callback) => {
       let tempList = [...playerList]
-      tempList.push({...lobbyData.host, id: hostId, loaded: true})
+      tempList.push({...host, ready: false, filled: true, loaded: true})
       setPlayerList(tempList)
-      setLobbySettings({...lobbyData, lobbyId: lobbyId, host: {...lobbyData.host, id: hostId}})
+      setLobbySettings({...lobbyData, lobbyId: lobbyId})
       setNewPlayerLoaded(true)
-      callback("INITILISED HOST + LOBBY")
-      console.log("SECOND")
     })
 
     socket.on('initilise-lobby-player', async () => {
-      
       socket.emit('lobby-state', lobbySettings)
     }) 
 
@@ -51,7 +47,7 @@ const Page: FC = () => {
     })
 
     setText({
-      button: socket.id == lobbySettings?.host.id ? "START GAME" : "READY",
+      // button: socket.id == lobbySettings?.host.id ? "START GAME" : "READY",
       reroll: lobbySettings?.reroll == true ? "ON" : "OFF"
     })
     if (lobbySettings != undefined) {
@@ -81,7 +77,6 @@ const Page: FC = () => {
             name: "",
             icon: "",
             ready: false,
-            host: false,
             filled: true,
             loaded: false
           })
@@ -103,30 +98,8 @@ const Page: FC = () => {
     }
   }, [lobbySettings, playerList])
 
-  /* ---- UPDATE LIST WHEN NEW PLAYER DOES ACTION ---- */
-
-  // useEffect(() => {
-  //   socket.emit('update-lobby')
-
-  //   socket.on('get-lobby-state', () => {
-  //     socket.emit('lobby-state', {playerList}) // add {playerList, lobbySettings} when editting lobby settings is possible
-  //   })
-
-  //   socket.on('lobby-state-from-server', (data) => {
-  //     setPlayerList(data)
-  //   })
-
-  //   // return () => {
-  //   //   socket.off('get-lobby-state')
-  //   //   socket.off('lobby-state-from-server')
-  //   // }
-  // }, [playerList]) // [lobbySettings, playerList] when editting lobby settings is possible
-
   const handleClick = () => {
-    let tempList = [...playerList]
-    const nextAvailableIndex = tempList.findIndex(player => player.filled == false)
-      tempList.push({...tempList[nextAvailableIndex], name: socket.id, filled: true})
-      setPlayerList(tempList)
+
   }
 
   useEffect(() => {
@@ -169,7 +142,7 @@ const Page: FC = () => {
               </div>
             </div>
             }
-            <button onClick={handleClick} className='text-4xl border-red border-8 rounded-xl w-64 m-auto p-2'>{text.button}</button>
+            <button onClick={handleClick} className='text-4xl border-red border-8 rounded-xl w-64 m-auto p-2'>READY</button>
           </div>
         </div>
 
