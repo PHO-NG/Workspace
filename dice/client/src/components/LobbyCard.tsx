@@ -8,14 +8,13 @@ type Props = {
     name: string,
     icon: string,
     ready: boolean,
-    host: boolean,
     filled: boolean,
     loaded: boolean
+    key: number
 }
 
 
-
-export default function LobbyCard({name, icon, ready, host, filled, loaded}: Props) {
+export default function LobbyCard({name, icon, ready, filled, loaded, key}: Props) {
   return (
     <div className='flex h-14 my-2'>
         <div className='-mt-1 relative '>
@@ -32,15 +31,15 @@ export default function LobbyCard({name, icon, ready, host, filled, loaded}: Pro
 
         {filled ?
         <div className='flex w-full'>
-            <div className={`w-3 h-full mx-3 ${ready || host ? 'bg-green' : 'bg-lightgray'}`}></div>   
-            {host == true &&
+            <div className={`w-3 h-full mx-3 ${ready ? 'bg-green' : 'bg-lightgray'}`}></div>   
+            {key == 1 &&
             <Icon 
                 icon="/host.png"
                 size={20}
                 styles='fixed ml-9 -mt-4' //change fixed
             />
             }
-            <div className={`w-full h-full ${ready || host ? "bg-[#2323237e]" : "bg-gray"}`}>
+            <div className={`w-full h-full ${ready ? "bg-[#2323237e]" : "bg-gray"}`}>
                 <h2 className='text-5xl my-1 ml-3'>{name}</h2>
             </div>
         </div>

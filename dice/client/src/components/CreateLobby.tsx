@@ -13,21 +13,16 @@ interface PageProps {
 const CreateLobby: FC<PageProps> = ({ gameId, socket }) => {
   const router = useRouter()
   const [counter, setCounter] = useState(0)
-  const [host, setHost] = useState<PlayerStatus>({
+  const [host, setHost] = useState<Player>({
     id: "",
     name: "Host",
     icon: "",
-    ready: false,
-    host: true,
-    filled: true,
-    loaded: false
   })
 
   const [lobby, setLobby] = useState({
     lobbyId: gameId,
     lobbyName: "Host Room",
     initialAmount: 1,
-    host: host,
     openLobby: false,
     spectator: false, 
     reroll: false
@@ -37,14 +32,9 @@ const CreateLobby: FC<PageProps> = ({ gameId, socket }) => {
     setHost(prev => ({...prev, icon: "/crew" + ((Math.abs(5 * counter) % 6 ) + 1) + ".png"}))
   }, [counter])
 
-  useEffect(() => {
-    setLobby( prev => ({...prev, host: host}))
-  }, [host])
-
-
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    socket.emit('create-room', lobby)
+    socket.emit('create-room', lobby, host)
     router.push(`/lobby/${gameId}` )
   }
 
