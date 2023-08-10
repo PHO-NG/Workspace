@@ -28,7 +28,7 @@ export default function Home() {
  
   return (
     <main>
-      <Title />
+      {/* <Title /> */}
       {/* <UserSettings /> */}
       
       <div>

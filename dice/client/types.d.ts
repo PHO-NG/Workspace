@@ -7,9 +7,8 @@ type Player = {
 type PlayerStatus = Player & {
     ready: boolean
     host: boolean
-    position: number
     filled: boolean
-    loaded?: boolean
+    loaded: boolean
   }
 
 type Lobby = {

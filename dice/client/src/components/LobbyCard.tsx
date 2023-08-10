@@ -26,7 +26,7 @@ export default function LobbyCard({name, icon, ready, host, filled, loaded}: Pro
                     size={70}
                 />
                 :
-                <Loader2 size={70} className='animate-spin' />)
+                <Loader2 size={69} className='animate-spin -ml-1' />)
             }
         </div>
 

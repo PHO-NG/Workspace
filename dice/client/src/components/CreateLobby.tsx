@@ -19,8 +19,8 @@ const CreateLobby: FC<PageProps> = ({ gameId, socket }) => {
     icon: "",
     ready: false,
     host: true,
-    position: 1,
-    filled: true
+    filled: true,
+    loaded: false
   })
 
   const [lobby, setLobby] = useState({

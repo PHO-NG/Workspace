@@ -7,17 +7,15 @@ interface NewPlayerProps {
   lobbyName: string
   lobbyId: string
   socket: Socket
-  newPlayerLoaded: boolean
-  onUpdate: () => void
+
 }
 
-const NewPlayer: FC<NewPlayerProps> = ({lobbyName, lobbyId, socket, newPlayerLoaded, onUpdate}) => {
+const NewPlayer: FC<NewPlayerProps> = ({lobbyName, lobbyId, socket}) => {
     const [counter, setCounter] = useState(0)
-    const [userData, setUserData] = useState<Player>({
-        id: "",
-        name: "Guest",
-        icon: "/crew1.png"
-    }) 
+    const [userData, setUserData] = useState({
+        name: "",
+        icon: ""
+    })
 
     socket.on("get-userId", (arg) => {
         setUserData(prev => ({...prev, id: arg}))
@@ -31,7 +29,6 @@ const NewPlayer: FC<NewPlayerProps> = ({lobbyName, lobbyId, socket, newPlayerLoa
     }, [counter])
 
     const handleClick = () => {
-        onUpdate()
         socket.emit('join-lobby', {...userData, lobbyId})
     }
       
