@@ -37,7 +37,7 @@ export default function LobbyCard({name, icon, ready, host, filled, loaded}: Pro
             <Icon 
                 icon="/host.png"
                 size={20}
-                styles='fixed ml-9 -mt-4'
+                styles='fixed ml-9 -mt-4' //change fixed
             />
             }
             <div className={`w-full h-full ${ready || host ? "bg-[#2323237e]" : "bg-gray"}`}>

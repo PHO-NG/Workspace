@@ -29,7 +29,6 @@ type Lobby = {
 
 
 const lobbyData : Lobby[] = []; //list of lobbies with no host initialised
-// const lobbyIds : String[] = []
 const HostIds : String[] = []
 
 io.on('connection',  (socket) => {
@@ -39,12 +38,12 @@ io.on('connection',  (socket) => {
     
     socket.on('create-room', (lobby) => {
         lobbyData.push(lobby)
-        // lobbyData = lobby;
-        socket.join(lobby.host.id);
-        // lobbyIds.push(lobby.host.id)
     })
+    
     socket.on('initilise-hostId', (lobbyId) => {
+        console.log("check")
         socket.join(lobbyId)
+        console.log('INIT ROOM. LOBBY ID: ' + lobbyId)
         // Find lobbyId in array full of lobbyIds (host should always find one)
         const lobbyIndex = lobbyData.findIndex(lobby => lobby.lobbyId = lobbyId)
         if (lobbyIndex != -1) {
@@ -52,17 +51,15 @@ io.on('connection',  (socket) => {
             socket.emit('initilise-lobby-host', lobbyData[lobbyIndex], socket.id)
             lobbyData.splice(lobbyIndex, 1)
         } else { //lobby has host already
-            console.log("HOST ALREADY LOCKED IN")
+            console.log("IM A PLAYER")
+            socket.broadcast.to(lobbyId).emit('initilise-lobby-player')
         }
     });
 
-    socket.on('join-lobby', (lobbyId) => {
-        socket.join(lobbyId)
-        socket.broadcast.to(lobbyId).emit('get-lobby-state')
-    })
-
-    socket.on('lobby-state', (lobbySettings) => {
+    socket.on('lobby-state', (lobbySettings) => { //data isnt updated yet for this
+        console.log(lobbySettings)
         socket.broadcast.to(lobbySettings.lobbyId).emit('lobby-state-from-server', lobbySettings)
+        console.log("NEW PLAYER CALLING")
     })
 
     socket.on('update-playerList', (lobbyId, userId) => {

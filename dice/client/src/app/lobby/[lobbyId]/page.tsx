@@ -12,8 +12,11 @@ const socket = io('http://localhost:3001', {
   transports: ["websocket", "polling"],
 })
 
+
 const Page: FC = () => {
+  const pathname = usePathname()
   const [lobbySettings, setLobbySettings] = useState<Lobby>();
+  const [lobbyId, setLobbyId] = useState<string>(pathname.split('/')[2])
   const [playerList, setPlayerList] = useState<PlayerStatus[]>(Array(6).fill({
     id: "",
     name: "",
@@ -24,118 +27,89 @@ const Page: FC = () => {
     filled: false,
     loaded: false
   }))
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [firstCheck, setFirstCheck] = useState<boolean>(false) //clear first useEffect
-  // const [userId, setUserId] = useState<string>("")
-  const [newPlayerLoaded, setNewPlayerLoaded] = useState<boolean>(false)
-  const pathname = usePathname()
+  const [lobby, setLobby] = useState(playerList.map((player, index) => (
+    <LobbyCard 
+      {...player}
+      key={index}
+      loaded={player.loaded != undefined ? player.loaded : true}
+    />
+  )))
+
   /* ---- GET RID OF RERENDERING BUG ---- */
   const [text, setText] = useState({
     button: "",
     reroll: "",
   })
 
-  /* ---- INITILISE LOBBY ---- */
+  /* ---- INITILISE LOBBY + HOST ---- */
   useEffect(() => {
-    console.log("FIRST")
-    socket.emit('initilise-hostId', (pathname.split('/')[2]))
-    socket.on('initilise-lobby-host', async (lobbyData, hostId) => {
-      setNewPlayerLoaded(true)
-      let tempList = playerList
+    socket.emit('initilise-hostId', lobbyId)
+    socket.on('initilise-lobby-host', (lobbyData : Lobby, hostId : string) => {
+      let tempList = [...playerList]
       tempList[lobbyData.host.position - 1] = {...lobbyData.host, id: hostId}
       setPlayerList(tempList)
-      setLobbySettings({...lobbyData, host: {...lobbyData.host, id: hostId}})
-      setText({
-        button: socket.id == lobbySettings?.host.id ? "START GAME" : "READY",
-        reroll: lobbySettings?.reroll == true ? "ON" : "OFF"
-      })
+      setLobbySettings({...lobbyData, lobbyId: lobbyId, host: tempList[lobbyData.host.position - 1]})
     })
-    setFirstCheck(true) 
+
+    socket.on('initilise-lobby-player', () => {
+      socket.emit('lobby-state', lobbySettings)
+    })
+
+    socket.on('lobby-state-from-server', (lobbyData : Lobby) => {
+      setLobbySettings(lobbyData)
+    })
+
+    setText({
+      button: socket.id == lobbySettings?.host.id ? "START GAME" : "READY",
+      reroll: lobbySettings?.reroll == true ? "ON" : "OFF"
+    })
       return () => {
         socket.off('initilise-lobby-host')
+        socket.off('initilise-lobby-player')
+        socket.off('lobby-state-from-server')
     }  
     
-  }, [])
+  }, [lobbySettings?.host.id])
+
    /* ---- UPDATE LIST WHEN NEW PLAYER CONNECTS ---- */
 
+
   useEffect(() => {
-    console.log("IM A NEW PLAYER GET ME IN")
-    if (newPlayerLoaded == false && firstCheck) {
-      console.log("IM IN!")
-      socket.emit('join-lobby', (pathname.split('/')[2]))
+    console.log("SECOND")
+    if (lobbySettings != undefined) {
+      console.log("THIRD")
+      socket.emit('update-playerList', lobbyId, socket.id)
 
-      socket.on('get-lobby-state', () => {
-        socket.emit('lobby-state', lobbySettings)
+      socket.on('get-and-update-playerList', (userId) => {
+        console.log("FOURTH")
+        let tempList = [...playerList]
+        if (tempList.find(player => player.id == userId) === undefined) {
+          const nextAvailableIndex = tempList.findIndex(player => player.filled == false)
+        // if (nextAvailableIndex == -1) { //lobby is full
+        //   //setSpectatorList(prev => prev.push())
+        // } else {
+          tempList[nextAvailableIndex] = {...tempList[nextAvailableIndex], id: userId, name: userId, position: nextAvailableIndex + 1, filled: true}
+          setPlayerList(tempList)
+          socket.emit('playerList', lobbyId, playerList)
+        // }
+        }
+        
       })
-
-      socket.on('lobby-state-from-server', (lobbyData) => {
-        setLobbySettings(lobbyData)
-        console.log(lobbyData)
+      socket.on('playerList-from-server', (list) => {
+        setPlayerList(list)
       })
-
-    //   socket.emit('update-playerList', (lobbySettings?.lobbyId, socket.id))
-
-    //   socket.on('get-and-update-playerList', (userId) => {
-    //     let tempList = playerList
-    //     const nextAvailableIndex = tempList.findIndex(player => player.filled == false)
-    //     if (nextAvailableIndex == -1) { //lobby is full
-    //       //setSpectatorList(prev => prev.push())
-    //     } else {
-    //       tempList[nextAvailableIndex] = {...tempList[nextAvailableIndex], id: userId, position: nextAvailableIndex + 1, filled: true}
-    //       setPlayerList(tempList)
-    //       socket.emit('playerList', (lobbySettings?.lobbyId, playerList))
-    //     }
-    //   })
-
-    //   socket.on('playerList-from-server', (list) => {
-    //     setPlayerList(list)
-    //   })
-      // return () => {
-      //   socket.off('get-lobby-state')
-      //   socket.off('lobby-state-from-server')
-      // }
-    } else {
-      console.log("FIRSTCHECK:" + firstCheck + ". newPlayerLoaded:" + newPlayerLoaded)
+      return () => {
+        socket.off('get-lobby-state')
+        socket.off('lobby-state-from-server')
+        socket.off('get-and-update-playerList')
+        socket.off('playerList-from-server')
+      }
     }
-  }, [lobbySettings])
-
- 
-  // useEffect(() => {
-  //   console.log("SECOND! " + newPlayerLoaded)
-  //   if (newPlayerLoaded == false) {
-  //     socket.emit('join-lobby', socket.io, (pathname.split('/')[2]))
-
-  //     socket.on('get-lobby-state', (userId) => {
-  //       socket.emit('lobby-state', lobbySettings, playerList)
-  //       let tempList = playerList
-  //       const nextAvailableIndex = tempList.findIndex(player => player.filled == false)
-  //       if (nextAvailableIndex == -1) { //lobby is full
-  //         //setSpectatorList(prev => prev.push())
-  //       } else {
-  //         tempList[nextAvailableIndex] = {...tempList[nextAvailableIndex], id: userId, position: nextAvailableIndex + 1, filled: true}
-  //       setPlayerList(tempList)
-  //       socket.emit('lobby-state', lobbySettings, playerList)
-  //       }
-  //     })
-
-  //     socket.on('lobby-state-from-server', (data) => {
-  //       setPlayerList(data.playerList)
-  //       setLobbySettings(data.lobbySettings)
-  //     })
-
-  //     return () => {
-  //       socket.off('get-lobby-state')
-  //       socket.off('lobby-state-from-server')
-  //     }
-      
-  //   }
-  // }, [newPlayerLoaded])
-
-  
-  
+  }, [lobbySettings, playerList])
 
   /* ---- UPDATE LIST WHEN NEW PLAYER DOES ACTION ---- */
-  useEffect(() => {
+
+  // useEffect(() => {
   //   socket.emit('update-lobby')
 
   //   socket.on('get-lobby-state', () => {
@@ -150,7 +124,7 @@ const Page: FC = () => {
   //   //   socket.off('get-lobby-state')
   //   //   socket.off('lobby-state-from-server')
   //   // }
-  }, [playerList]) // [lobbySettings, playerList] when editting lobby settings is possible
+  // }, [playerList]) // [lobbySettings, playerList] when editting lobby settings is possible
 
   const handleClick = () => {
     // socket.on('get-userId', (id) => {
@@ -166,19 +140,31 @@ const Page: FC = () => {
     // return () => {
     //   socket.off('get-userId')
     // }
+    
   }
+
+  useEffect(() => {
+    setLobby(playerList.map((player, index) => (
+      <LobbyCard 
+        {...player}
+        key={index}
+        loaded={player.loaded != undefined ? player.loaded : true}
+      />
+    )))
+  }, [playerList])
   
-  let lobby = playerList.map((player, index) => (
-    <LobbyCard 
-      {...player}
-      key={index}
-      loaded={player.loaded != undefined ? player.loaded : true}
-    />
-  ))
+  //  let lobby = playerList.map((player, index) => (
+  //     <LobbyCard 
+  //       {...player}
+  //       key={index}
+  //       loaded={player.loaded != undefined ? player.loaded : true}
+  //     />
+  //   ))
+   
 
   return <>
     {lobbySettings?.initialAmount != undefined && <div>
-      {/* <Title /> */}
+      <Title />
       <Link href="/" className='absolute left-3 top-3'>EXIT</Link>
       {/* {newPlayerLoaded == false && <NewPlayer lobbyName={lobbySettings?.lobbyName || ""} lobbyId={lobbySettings?.lobbyId || ""} socket={socket} newPlayerLoaded={newPlayerLoaded} onUpdate={() => setNewPlayerLoaded(true)}/>} */}
       <div className='flex justify-evenly'>
