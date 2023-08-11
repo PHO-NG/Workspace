@@ -16,87 +16,93 @@ const socket = io('http://localhost:3001', {
 const Page: FC = () => {
   const lobbyId = usePathname().split('/')[2]
   const [lobbySettings, setLobbySettings] = useState<Lobby>();
+  const [playerSettings, setPlayerSettings] = useState<Player>({
+    id: socket.id,
+    name: "",
+    icon: ""
+  });
   const [playerList, setPlayerList] = useState<PlayerStatus[]>([])
-  const [lobby, setLobby] = useState<JSX.Element[]>()
+  const [lobbyMap, setLobbyMap] = useState<JSX.Element[]>()
   const [newPlayerLoaded, setNewPlayerLoaded] = useState<boolean>(false)
   const [lobbyFinalised, setLobbyFinalised] = useState<boolean>(false)
 
   /* ---- GET RID OF RERENDERING BUG ---- */
   const [text, setText] = useState({
-    // button: "",
+    button: "",
     reroll: "",
+    initialAmount: ""
   })
 
   /* ---- INITILISE LOBBY + HOST ---- */
   useEffect(() => {
-    socket.emit('initilise-hostId', lobbyId)
-    socket.on('initilise-lobby-host', (lobbyData : Lobby, host : Player, callback) => {
-      let tempList = [...playerList]
-      tempList.push({...host, ready: false, filled: true, loaded: true})
-      setPlayerList(tempList)
+    socket.emit('find-lobby-on-server', lobbyId)
+    socket.on('initilise-lobby', (lobbyData, host) => {
       setLobbySettings({...lobbyData, lobbyId: lobbyId})
-      setNewPlayerLoaded(true)
+      if (host) {
+        let tempList = [...playerList]
+        const index = playerList.findIndex(player => player.id = socket.id)
+        if (index === -1) {
+          tempList.push({...lobbyData.host, id: socket.id, ready: false, filled: true, loaded: true})
+        } 
+        setPlayerList(tempList)
+        setNewPlayerLoaded(true)
+        setText(prev => ({...prev, button: "START GAME"}))
+      }
+      else {
+        setText(prev => ({...prev, button: "READY"}))
+      }
     })
 
-    socket.on('initilise-lobby-player', async () => {
-      socket.emit('lobby-state', lobbySettings)
-    }) 
-
-    socket.on('lobby-state-from-server', (lobbyData : Lobby) => {
-      setLobbySettings(lobbyData)
-    })
-
-    setText({
-      // button: socket.id == lobbySettings?.host.id ? "START GAME" : "READY",
-      reroll: lobbySettings?.reroll == true ? "ON" : "OFF"
-    })
     if (lobbySettings != undefined) {
       setLobbyFinalised(true)
+      setText(prev => ({...prev, 
+        reroll: lobbySettings.reroll == true ? "ON" : "OFF", 
+        initialAmount: lobbySettings.initialAmount == 1 ? "Dynamic": lobbySettings.initialAmount.toString()
+      }))
     }
-      return () => {
-        socket.off('initilise-lobby-host')
-        socket.off('initilise-lobby-player')
-        socket.off('lobby-state-from-server')
+
+    return () => {
+      socket.off('initilise-lobby')
     }  
   }, [lobbyFinalised])
 
    /* ---- UPDATE LIST WHEN NEW PLAYER CONNECTS ---- */
 
   useEffect(() => {
-    if (lobbySettings != undefined && playerList.length > 0) {
-      console.log("FOURTH")
-      socket.emit('update-playerList', lobbyId, socket.id)
+    socket.emit('update-playerList', lobbyId, socket.id)
 
-      socket.on('get-and-update-playerList', (userId) => {
-        console.log("FIFTH")
+    socket.on('get-and-update-playerList', (userId) => {
+      
+      if (playerList.findIndex(player => player.id == userId) === -1) {
         let tempList = [...playerList]
-        if (playerList.findIndex(player => player.id == userId) === -1) {
-          console.log("PLAYER LIST SIZE = " + playerList.length) // 6 = room length. maybe make setting to change room size???
+        console.log("ADDED")
+        if (userId != null) {
           tempList.push({
             id: userId,
-            name: "",
+            name: userId,
             icon: "",
             ready: false,
             filled: true,
             loaded: false
           })
-
-          setPlayerList(tempList)
-          socket.emit('playerList', lobbyId, playerList)        
         }
-      })
-      socket.on('playerList-from-server', (list) => {
-        setPlayerList(list)
-        setNewPlayerLoaded(true)
-      })
-      return () => {
-        socket.off('get-lobby-state')
-        socket.off('lobby-state-from-server')
-        socket.off('get-and-update-playerList')
-        socket.off('playerList-from-server')
+
+        setPlayerList(tempList)
+        socket.emit('playerList', lobbyId, tempList)        
       }
+    })
+    socket.on('playerList-from-server', (list) => {
+      setPlayerList(list)
+      // setNewPlayerLoaded(true)
+    })
+    console.log(playerList)
+    return () => {
+      socket.off('get-lobby-state')
+      socket.off('lobby-state-from-server')
+      socket.off('get-and-update-playerList')
+      socket.off('playerList-from-server')
     }
-  }, [lobbySettings, playerList])
+  }, [playerList])
 
   const handleClick = () => {
 
@@ -104,7 +110,6 @@ const Page: FC = () => {
 
   useEffect(() => {
     if (playerList != undefined) {
-      console.log(playerList)
       let tempList = playerList;
       tempList = [ ...tempList, ...Array(Math.max(6 - tempList.length)).fill({
         id: "",
@@ -115,16 +120,16 @@ const Page: FC = () => {
         filled: false,
         loaded: false
       })];
-      setLobby(tempList.map((player, index) => (
+      setLobbyMap(tempList.map((player, index) => (
         <LobbyCard 
           {...player}
           key={index}
+          index={index}
         />
       )))
     }
   }, [playerList])
    
-
   return <>
     {lobbySettings?.initialAmount != undefined && <div>
       {/* <Title /> */}
@@ -132,7 +137,7 @@ const Page: FC = () => {
       {newPlayerLoaded == false && <NewPlayer lobbyName={lobbySettings.lobbyName} lobbyId={lobbySettings.lobbyId} socket={socket}/>}
       <div className='flex justify-evenly'>
         <div className='flex flex-col w-5/12'>
-          {lobby}
+          {lobbyMap}
           <div className='flex justify-between w-10/12 mx-auto'>
             {lobbySettings?.spectator == true &&
             <div className='flex text-4xl w-64 m-auto p-3 bg-[#161616]'>
@@ -142,13 +147,13 @@ const Page: FC = () => {
               </div>
             </div>
             }
-            <button onClick={handleClick} className='text-4xl border-red border-8 rounded-xl w-64 m-auto p-2'>READY</button>
+            <button onClick={handleClick} className='text-4xl border-red border-8 rounded-xl w-64 m-auto p-2'>{text.button}</button>
           </div>
         </div>
 
         <div className='w-5/12'>
           <h2 className='text-4xl'>ROOM NAME: {lobbySettings?.lobbyName}</h2>
-          <h2 className='text-4xl my-3'>INITIAL AMOUNT: {lobbySettings?.initialAmount == 1 ? "Dynamic": lobbySettings?.initialAmount}</h2>
+          <h2 className='text-4xl my-3'>INITIAL AMOUNT: {text.initialAmount}</h2>
           <div className='flex'>
             <h2 className='text-4xl'>RE-ROLL DICE: {text.reroll} </h2>
           </div>

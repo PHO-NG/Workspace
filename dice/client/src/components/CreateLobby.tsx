@@ -25,16 +25,22 @@ const CreateLobby: FC<PageProps> = ({ gameId, socket }) => {
     initialAmount: 1,
     openLobby: false,
     spectator: false, 
-    reroll: false
+    reroll: false,
+    host: host
+
   })
 
   useEffect(() => {
     setHost(prev => ({...prev, icon: "/crew" + ((Math.abs(5 * counter) % 6 ) + 1) + ".png"}))
   }, [counter])
+  
+  useEffect(() => {
+    setLobby(prev => ({...prev, host: host}))
+  }, [host])
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    socket.emit('create-room', lobby, host)
+    socket.emit('create-room', lobby)
     router.push(`/lobby/${gameId}` )
   }
 

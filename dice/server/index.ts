@@ -23,7 +23,7 @@ type Lobby = {
     openInvite: boolean
     spectator: boolean
     reroll: boolean
-    playerList?: Player[]
+    host : Player
 }
 
 
@@ -35,28 +35,21 @@ io.on('connection',  (socket) => {
     socket.emit('get-userId', (socket.id))
     /* ---- LOBBY SETTINGS ---- */
     
-    socket.on('create-room', (lobby, host) => {
-        lobbyData.push(lobby, host)
+    socket.on('create-room', (lobby) => {
+        lobbyData.push(lobby)
     })
     
-    socket.on('initilise-hostId', (lobbyId) => {
+    socket.on('find-lobby-on-server', (lobbyId) => {
         socket.join(lobbyId)
         // Find lobbyId in array full of lobbyIds (host should always find one)
         const lobbyIndex = lobbyData.findIndex(lobby => lobby.lobbyId = lobbyId)
-        if (lobbyIndex != -1) {
-            console.log("IM THE HOST NOW")
-            socket.emit('initilise-lobby-host', lobbyData[lobbyIndex], socket.id)
-            lobbyData.splice(lobbyIndex, 1)
-        } else { //lobby has host already
-            console.log("IM A PLAYER")
-            socket.broadcast.to(lobbyId).emit('initilise-lobby-player')
-        }
+        if (lobbyData[lobbyIndex].host.id === "") {
+            lobbyData[lobbyIndex] = {...lobbyData[lobbyIndex], host: {...lobbyData[lobbyIndex].host, id: socket.id}}
+            socket.emit('initilise-lobby', lobbyData[lobbyIndex], true)
+        } else {
+            socket.emit('initilise-lobby', lobbyData[lobbyIndex], false)
+        }   
     });
-
-    socket.on('lobby-state', (lobbySettings) => { //data isnt updated yet for this
-        socket.broadcast.to(lobbySettings.lobbyId).emit('lobby-state-from-server', lobbySettings)
-        console.log("NEW PLAYER CALLING")
-    })
 
     socket.on('update-playerList', (lobbyId, userId) => {
         socket.broadcast.to(lobbyId).emit('get-and-update-playerList', userId)
@@ -68,7 +61,10 @@ io.on('connection',  (socket) => {
 
     socket.on('disconnect', () => {
         socket.removeAllListeners();   
-         
+        const index = lobbyData.findIndex(lobby => lobby.host.id = socket.id)
+        if (index != -1) {
+            lobbyData.splice(index, 1)
+        }
         console.log('user disconnected')
     })
   })
