@@ -59,9 +59,13 @@ io.on('connection',  (socket) => {
         socket.broadcast.to(lobbyId).emit('playerList-from-server', list)
     })
 
+    socket.on('join-lobby', (userData, lobbyId) => {
+        socket.broadcast.in(lobbyId).emit('finalise-player', userData)
+    })
+
     socket.on('disconnect', () => {
         socket.removeAllListeners();   
-        const index = lobbyData.findIndex(lobby => lobby.host.id = socket.id)
+        const index = lobbyData.findIndex(lobby => lobby.host.id === socket.id)
         if (index != -1) {
             lobbyData.splice(index, 1)
         }

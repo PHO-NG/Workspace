@@ -40,7 +40,7 @@ export default function LobbyCard({name, icon, ready, filled, loaded, index}: Pr
             />
             }
             <div className={`w-full h-full ${ready || index == 0 ? "bg-[#2323237e]" : "bg-gray"}`}>
-                <h2 className='text-5xl my-1 ml-3'>{name}</h2>
+                <h2 className='text-5xl my-1 ml-3'>{name == "" ? "Loading..." : name}</h2>
             </div>
         </div>
          : 

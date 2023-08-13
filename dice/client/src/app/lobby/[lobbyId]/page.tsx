@@ -16,15 +16,11 @@ const socket = io('http://localhost:3001', {
 const Page: FC = () => {
   const lobbyId = usePathname().split('/')[2]
   const [lobbySettings, setLobbySettings] = useState<Lobby>();
-  const [playerSettings, setPlayerSettings] = useState<Player>({
-    id: socket.id,
-    name: "",
-    icon: ""
-  });
   const [playerList, setPlayerList] = useState<PlayerStatus[]>([])
   const [lobbyMap, setLobbyMap] = useState<JSX.Element[]>()
   const [newPlayerLoaded, setNewPlayerLoaded] = useState<boolean>(false)
   const [lobbyFinalised, setLobbyFinalised] = useState<boolean>(false)
+  
 
   /* ---- GET RID OF RERENDERING BUG ---- */
   const [text, setText] = useState({
@@ -72,29 +68,39 @@ const Page: FC = () => {
     socket.emit('update-playerList', lobbyId, socket.id)
 
     socket.on('get-and-update-playerList', (userId) => {
-      
       if (playerList.findIndex(player => player.id == userId) === -1) {
         let tempList = [...playerList]
         console.log("ADDED")
         if (userId != null) {
           tempList.push({
             id: userId,
-            name: userId,
+            name: "",
             icon: "",
             ready: false,
             filled: true,
             loaded: false
           })
         }
-
         setPlayerList(tempList)
         socket.emit('playerList', lobbyId, tempList)        
       }
     })
+
     socket.on('playerList-from-server', (list) => {
       setPlayerList(list)
       // setNewPlayerLoaded(true)
     })
+
+    socket.on('finalise-player', (userData) => {
+      let tempList = [...playerList]
+      const index = tempList.findIndex(player => player.id == userData.id)
+      if (index !== -1) {
+        tempList[index] = {...tempList[index], ...userData, loaded: true}
+        setPlayerList(tempList)
+        socket.emit('playerList', lobbyId, tempList)
+      }
+    })
+
     console.log(playerList)
     return () => {
       socket.off('get-lobby-state')
@@ -134,7 +140,7 @@ const Page: FC = () => {
     {lobbySettings?.initialAmount != undefined && <div>
       {/* <Title /> */}
       <Link href="/" className='absolute left-3 top-3'>EXIT</Link>
-      {newPlayerLoaded == false && <NewPlayer lobbyName={lobbySettings.lobbyName} lobbyId={lobbySettings.lobbyId} socket={socket}/>}
+      {newPlayerLoaded == false && <NewPlayer lobbyName={lobbySettings.lobbyName} lobbyId={lobbySettings.lobbyId} socket={socket} updatePlayer={(bool : boolean) => setNewPlayerLoaded(bool)}/>}
       <div className='flex justify-evenly'>
         <div className='flex flex-col w-5/12'>
           {lobbyMap}
