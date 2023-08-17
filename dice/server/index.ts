@@ -63,6 +63,10 @@ io.on('connection',  (socket) => {
         socket.broadcast.in(lobbyId).emit('finalise-player', userData)
     })
 
+    socket.on('player-ready', (userId, lobbyId) => {
+        socket.broadcast.to(lobbyId).emit('set-ready', userId)
+    })
+
     socket.on('disconnect', () => {
         socket.removeAllListeners();   
         const index = lobbyData.findIndex(lobby => lobby.host.id === socket.id)

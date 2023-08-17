@@ -101,17 +101,31 @@ const Page: FC = () => {
       }
     })
 
+    socket.on('set-ready', (userId) => {
+      let tempList = [...playerList]
+      const index = tempList.findIndex(player => player.id == userId)
+      if (index !== -1) {
+        tempList[index] = {...tempList[index], ready: !tempList[index].ready}
+        setPlayerList(tempList)
+        socket.emit('playerList', lobbyId, tempList)
+      }
+    })
+
     console.log(playerList)
     return () => {
       socket.off('get-lobby-state')
       socket.off('lobby-state-from-server')
       socket.off('get-and-update-playerList')
       socket.off('playerList-from-server')
+      socket.off('finalise-player')
+      socket.off('set-ready')
     }
   }, [playerList])
 
   const handleClick = () => {
+    socket.emit('player-ready', socket.id, lobbyId)
 
+    //make a big socket.on('update-playerlist', (newUserData))
   }
 
   useEffect(() => {
@@ -138,7 +152,7 @@ const Page: FC = () => {
    
   return <>
     {lobbySettings?.initialAmount != undefined && <div>
-      {/* <Title /> */}
+      <Title />
       <Link href="/" className='absolute left-3 top-3'>EXIT</Link>
       {newPlayerLoaded == false && <NewPlayer lobbyName={lobbySettings.lobbyName} lobbyId={lobbySettings.lobbyId} socket={socket} updatePlayer={(bool : boolean) => setNewPlayerLoaded(bool)}/>}
       <div className='flex justify-evenly'>

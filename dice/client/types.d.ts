@@ -10,6 +10,12 @@ type PlayerStatus = Player & {
     loaded: boolean
   }
 
+type PlayerGameState = Player & {
+    dice: number[]
+    turn: boolean //turn to play
+    target: boolean
+}
+
 type Lobby = {
     lobbyId: string
     lobbyName: string
