@@ -2,7 +2,8 @@
 'use client'
 import { FC, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+
 import Title from '@/components/Title/Title'
 import LobbyCard from '@/components/LobbyCard'
 
@@ -14,6 +15,7 @@ const socket = io('http://localhost:3001', {
 
 
 const Page: FC = () => {
+  const router = useRouter()
   const lobbyId = usePathname().split('/')[2]
   const [lobbySettings, setLobbySettings] = useState<Lobby>();
   const [playerList, setPlayerList] = useState<PlayerStatus[]>([])
@@ -70,7 +72,6 @@ const Page: FC = () => {
     socket.on('get-and-update-playerList', (userId) => {
       if (playerList.findIndex(player => player.id == userId) === -1) {
         let tempList = [...playerList]
-        console.log("ADDED")
         if (userId != null) {
           tempList.push({
             id: userId,
@@ -88,7 +89,6 @@ const Page: FC = () => {
 
     socket.on('playerList-from-server', (list) => {
       setPlayerList(list)
-      // setNewPlayerLoaded(true)
     })
 
     socket.on('finalise-player', (userData) => {
@@ -105,10 +105,19 @@ const Page: FC = () => {
       let tempList = [...playerList]
       const index = tempList.findIndex(player => player.id == userId)
       if (index !== -1) {
-        tempList[index] = {...tempList[index], ready: !tempList[index].ready}
+        if (index == 0) { //host
+          socket.emit('finalise-lobby', playerList, lobbySettings, lobbyId)
+        } else {
+          tempList[index] = {...tempList[index], ready: !tempList[index].ready}
         setPlayerList(tempList)
         socket.emit('playerList', lobbyId, tempList)
+        }
       }
+    })
+
+    socket.on('move-to-game', () => {
+      console.log("MOVING")
+      router.push(`/game/${lobbyId}`)
     })
 
     console.log(playerList)

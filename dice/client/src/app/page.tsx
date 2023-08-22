@@ -30,7 +30,6 @@ export default function Home() {
     <main>
       <Title />
       {/* <UserSettings /> */}
-      
       <div>
         {
           initiate === false
