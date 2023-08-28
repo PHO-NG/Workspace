@@ -4,22 +4,22 @@ interface DieProps {
   face: number
   size: number
   reveal: boolean
-  rotation?: boolean
+  rotation?: number
   customStyle? : {}
 }
 
 const Die: FC<DieProps> = ({face, size, reveal, rotation, customStyle}) => {
-    const styles = {
+    let styles = {
         height: size,
         width: size,
-        rotate: rotation ? Math.floor(Math.random() * 360) + "deg" : 0 + "deg",
+        rotate: rotation ? rotation * 60 + "deg" : 0 + "deg",
         borderRadius: size/10
     }
-    const dotStyles = {
-        height: size/6,
-        width: size/6,
+    let dotStyles = {
+        height: size/5.5,
+        width: size/5.5,
     }
-    console.log("CHANGE")
+
   return <>
   <div style={customStyle}>
     <div className={`relative border-2 border-black bg-white`} style={styles}>

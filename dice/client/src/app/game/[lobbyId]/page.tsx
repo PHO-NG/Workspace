@@ -1,167 +1,211 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client'
-import { FC, useState, useEffect } from 'react'
+import { FC, Suspense, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { io } from 'socket.io-client'
-import PlayerIcons from '@/components/PlayerIcons'
-import Die from '@/components/Die'
-import Dice from '@/components/Dice'
 
+import { io } from 'socket.io-client'
+import NewPlayer from '@/components/NewPlayer'
+import Lobby from '@/components/Lobby'
+import Game from '@/components/Game'
+import Loading from './loading'
 const socket = io('http://localhost:3001', {
   transports: ["websocket", "polling"],
 })
 
 const Page: FC = () => {
   const lobbyId = usePathname().split('/')[2]
-  const [playerList, setPlayerList] = useState<PlayerGameState[]>(Array(Math.max(6)).fill({
-    id: 12,
-    name: "Player",
-    icon: "/crew4.png",
-    dice: [1,2,3,4,5],
-    turn: false,
-    target: {}
-  }))
-  // const [lobbySettings, setLobbySettings] = useState<Lobby>(); //maybe not needed and can just send via socket
-  const [dice, setDice] = useState<number[]>([])
+  const [lobbySettings, setLobbySettings] = useState<Lobby>({
+    lobbyId: lobbyId,
+    lobbyName: "",
+    initialAmount: 0,
+    openLobby: false,
+    spectator: false,
+    reroll: false
+  });
+  const [playerList, setPlayerList] = useState<PlayerStatus[] | PlayerGameState[]>([])
+
+  /* ---- LOBBY STATES ---- */
+  const [newPlayerLoaded, setNewPlayerLoaded] = useState<boolean>(false)
+  const [startGame, setStartGame] = useState<boolean>(false)
+
+  /* ---- GAME STATES ---- */
   const [amountSelection, setAmountSelection] = useState<number[]>([4,5,6])
-  const [diceSelected, setDiceSelected] = useState<number>()
-  const [amountSelected, setAmountSelected] = useState<number>()
-  const [turnHistory, setTurnHistory] = useState()
+  const [diceSelected, setDiceSelected] = useState<number>(0)
+  const [amountSelected, setAmountSelected] = useState<number>(0)
+  const [turnHistory, setTurnHistory] = useState<TurnHistory[]>([])
+  
 
-  useEffect(() => {
-    setDice(Array.from({length: 5}, () => Math.floor(Math.random() * 6) + 1))
-  }, [])
-
-  // const handleRoll = () => {
-  //   setDice(Array.from({length: 5}, () => Math.floor(Math.random() * 6) + 1))
-  // }
-
-  useEffect(() => {
-    
+  /* ---- GET RID OF RERENDERING BUG ---- */
+  const [text, setText] = useState({
+    button: "",
+    reroll: "",
+    initialAmount: ""
   })
 
-  const calculatePosition = (player: PlayerGameState, index : number) => {   
-    let variance = playerList.length % 2 == 1 ? (index == 0 ? 0 : 20) : 0;
-    const angle = (360 / playerList.length) *  Math.PI/180 * index
-    const playerXPos = 260 + ((Math.sin(angle)) * 380)
-    const playerYPos = (index == 0 ? 130 : 100) - (Math.cos(angle) * 230) + variance
-    const playerStyles = {
-      left: playerXPos,  
-      top: playerYPos
+  /* ---- INITILISE LOBBY ---- */
+  useEffect(() => {
+    socket.emit('find-lobby-on-server', lobbyId)
+    socket.on('initilise-lobby', (lobbyData, host) => {
+      if (lobbySettings.lobbyName === "") {
+        setLobbySettings(lobbyData)
+        if (host) {
+          let tempList = [...playerList] as PlayerStatus[]
+          const index = playerList.findIndex(player => player.id === socket.id)
+          if (index === -1) {
+            tempList.push({...lobbyData.host, id: socket.id, ready: false, filled: true, loaded: true})
+          } 
+          setPlayerList(tempList)
+          setNewPlayerLoaded(true)
+          setText(prev => ({...prev, button: "START GAME"}))
+        }
+        else {
+          setText(prev => ({...prev, button: "READY"}))
+        }
+      }
+    })
+
+    if (lobbySettings != undefined) {
+      setText(prev => ({...prev, 
+        reroll: lobbySettings.reroll == true ? "ON" : "OFF", 
+        initialAmount: lobbySettings.initialAmount == 1 ? "Dynamic": lobbySettings.initialAmount.toString()
+      }))
     }
-    const diceXPos = 235 + ((Math.sin(angle)) * 250)
-    const diceYPos = (index == 0 ? 130 : 110) - (Math.cos(angle) * 115) + variance
-    const diceStyles = {
-      left: diceXPos,  
-      top: diceYPos
+
+    return () => {
+      socket.off('initilise-lobby')
+    }  
+  }, [lobbySettings])
+
+  /* ---- UPDATE LIST WHEN ACTION OCCURS ---- */
+  useEffect(() => {
+    /* ---- LOBBY FUNCTIONALITY ---- */
+    socket.emit('update-playerList', lobbyId, socket.id)
+
+    socket.on('get-and-update-playerList', (userId) => {
+      let tempList = [...playerList] as PlayerStatus[]
+      if ((tempList.findIndex(player => player.id == userId) === -1)) {
+        if (userId != null) {
+          tempList.push({
+            id: userId,
+            name: "",
+            icon: "",
+            ready: false,
+            filled: true,
+            loaded: false
+          })
+        }
+        setPlayerList(tempList)
+        socket.emit('playerList', lobbyId, tempList)        
+      }
+    })
+
+    socket.on('playerList-from-server', (list) => {
+      setPlayerList(list)
+    })
+
+    socket.on('finalise-player', (userData) => {
+
+      let tempList = [...playerList] as PlayerStatus[]
+      const index = tempList.findIndex(player => player.id === userData.id)
+      if (index !== -1) {
+        tempList[index] = {...tempList[index], ...userData, loaded: true}
+        setPlayerList(tempList)
+        socket.emit('playerList', lobbyId, tempList)
+      }
+    })
+
+    socket.on('set-ready', (userId) => {
+      const index = playerList.findIndex(player => player.id == userId)
+      if (index !== -1) {
+        if (index == 0) { //host
+          let tempList : PlayerGameState[]
+          tempList = playerList.map((player, index) => ({
+            id: player.id,
+            name: player.name,
+            icon: player.icon,
+            dice: Array.from({length: 5}, () => Math.floor(Math.random() * 6) + 1),
+            turn: index === 0 ? true: false,
+            reveal: false,
+            target: index === 1 ? true : false
+          }))
+          socket.emit('finalise-lobby', tempList, lobbyId)
+        } else {
+          let tempList = [...playerList] as PlayerStatus[]
+          tempList[index] = {...tempList[index], ready: !tempList[index].ready}
+          setPlayerList(tempList)
+          socket.emit('playerList', lobbyId, tempList)
+        }
+      }
+    })
+
+    socket.on('move-to-game-state', (list) => {
+      setPlayerList(list)
+      let tempHistory = [...turnHistory] as TurnHistory[]
+      tempHistory.push({
+        player: list[0],
+        target: list[1],
+        amountCalled: 3,
+        diceNumber: 4
+      })
+      tempHistory.push({
+        player: list[1],
+        target: list[0],
+        amountCalled: 6,
+        diceNumber: 6
+      })
+      setTurnHistory(tempHistory)
+      setStartGame(true)
+    })
+
+    /* ---- GAME FUNCTIONALITY ---- */
+    socket.on('show-player-hand', (userId) => {
+      let tempList = [...playerList] as PlayerGameState[]
+      const index = tempList.findIndex(player => player.id === userId)
+      tempList[index] = {...tempList[index], reveal: true}
+      setPlayerList(tempList)
+    })
+
+    return () => {
+      socket.off('get-lobby-state')
+      socket.off('lobby-state-from-server')
+      socket.off('get-and-update-playerList')
+      socket.off('playerList-from-server')
+      socket.off('finalise-player')
+      socket.off('set-ready')
+      socket.off('move-to-game-state')
     }
-    return <div key={index}>
-      <div className="absolute text-center" style={playerStyles}>
-        <h2 className='caret-transparent'>{player.name}</h2>
-        <PlayerIcons 
-            icon={player.icon}
-            size={50}
-            //target <= opacity 50 all except current player + target(s)
+  }, [playerList])
+   
+  return <>
+    {
+      startGame == false ?
+      <Suspense fallback={<Loading />}>
+        <div>
+        {newPlayerLoaded == false && <NewPlayer lobbyName={lobbySettings.lobbyName} lobbyId={lobbySettings.lobbyId} socket={socket} updatePlayer={(bool : boolean) => setNewPlayerLoaded(bool)}/>}
+        <Lobby 
+          playerList = {playerList as PlayerStatus[]}
+          lobbySettings = {lobbySettings}
+          socket = {socket}
+          text = {text}
         />
       </div>
-      <div className='absolute' style={diceStyles}>
-          <Dice 
-            dice = {player.dice}
-            reveal = {true}
-            size = {20}
-          />
-      </div>  
-    </div> 
-  }
-
-  const players = playerList.map((player, index) => (
-    calculatePosition(player, index)
-  ))
-  
-  return <>
-    {/* BOARD */}
-    <div className='relative w-[600px] h-[321px] border-[12px] rounded-[150px] border-red mx-auto mt-24'>
-      {players}
-    </div>
-
-    {/* MIDDLE SECTION */}
-    <div>
-      <div className='fixed bottom-[80px] left-2/4 -translate-x-2/4 bg-red rounded-lg p-1 -mb-1'>
-        <button className='w-[60px] h-[60px] border-2 border-black bg-white rounded-md' onClick={() => setAmountSelected(amountSelection[0])}>
-          <h2 className='text-black text-4xl font-bold'>{amountSelection[0]}</h2>
-        </button>
-        <button className='w-[60px] h-[60px] mx-1 border-2 border-black bg-white rounded-md' onClick={() => setAmountSelected(amountSelection[1])}>
-          <h2 className='text-black text-4xl font-bold'>{amountSelection[1]}</h2>
-        </button>
-        <button className='w-[60px] h-[60px] border-2 border-black bg-white rounded-md' onClick={() => setAmountSelected(amountSelection[2])}>
-          <h2 className='text-black text-4xl font-bold'>{amountSelection[2]}</h2>
-        </button>
-      </div>
-      <div className='fixed bottom-[0] left-2/4 -translate-x-2/4 bg-red rounded-lg pt-1'>
-        <button className='mx-1' onClick={() => setDiceSelected(1)}>
-          <Die 
-            face={1}
-            size={60}
-            reveal={true}
-            customStyle={{filter: "drop-shadow(3px 3px 0px #000)"}}
-          />
-        </button>
-        <button className='mx-1' onClick={() => setDiceSelected(2)}>
-          <Die 
-            face={2}
-            size={60}
-            reveal={true}
-            customStyle={{filter: "drop-shadow(3px 3px 0px #000)"}}
-          />
-        </button>
-        <button className='mx-1' onClick={() => setDiceSelected(3)}>
-          <Die 
-            face={3}
-            size={60}
-            reveal={true}
-            customStyle={{filter: "drop-shadow(3px 3px 0px #000)"}}
-          />
-        </button>
-        <button className='mx-1' onClick={() => setDiceSelected(4)}>
-          <Die 
-            face={4}
-            size={60}
-            reveal={true}
-            customStyle={{filter: "drop-shadow(3px 3px 0px #000)"}}
-          />
-        </button>
-        <button className='mx-1' onClick={() => setDiceSelected(5)}>
-          <Die 
-            face={5}
-            size={60}
-            reveal={true}
-            customStyle={{filter: "drop-shadow(3px 3px 0px #000)"}}
-          />
-        </button>
-        <button className='mr-2 ml-1' onClick={() => setDiceSelected(6)}>
-          <Die 
-            face={6}
-            size={60}
-            reveal={true}
-            customStyle={{filter: "drop-shadow(3px 3px 0px #000)"}}
-          />
-        </button>
-      </div>
-    </div>
-
-    {/* RIGHT SECTION */}
-    <div className='fixed bottom-0 left-3/4 -translate-x-2/4 -mb-12'>
-      <Dice
-        dice = {dice}
-        reveal = {true}
-        size = {80} 
-      />
-    </div>
-    {/* <button onClick={handleRoll}> </button> */}
-
-    {/* LEFT SECTION */}
-    <div>
-      
-    </div>
+      </Suspense>
+      :
+      <Suspense fallback={<Loading />}>
+        <Game
+          lobbyId = {lobbyId} 
+          socket = {socket}
+          playerList = {playerList as PlayerGameState[]}
+          amountSelected = {amountSelected}
+          turnHistory = {turnHistory}
+          diceSelected = {diceSelected}
+          setDiceSelected = {setDiceSelected}
+          amountSelection = {amountSelection}
+          setAmountSelected = {setAmountSelected}
+        />
+      </Suspense>
+    }
   </>
 }
+
 export default Page

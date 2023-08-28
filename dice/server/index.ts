@@ -28,7 +28,7 @@ type Lobby = {
 
 const lobbyData : Lobby[] = []; //list of lobbies with no host initialised
 
-io.on('connection',  (socket) => {
+io.on('connection', (socket) => {
     console.log("user connected: " + socket.id)
     socket.emit('get-userId', (socket.id))
     /* ---- LOBBY SETTINGS ---- */
@@ -58,19 +58,27 @@ io.on('connection',  (socket) => {
     })
 
     socket.on('join-lobby', (userData, lobbyId) => {
-        socket.broadcast.to(lobbyId).emit('finalise-player', userData)
+        socket.broadcast.to(lobbyId).emit('finalise-player', {...userData, id: socket.id})
     })
 
     socket.on('player-ready', (userId, lobbyId) => {
-        socket.broadcast.to(lobbyId).emit('set-ready', userId)
+        io.to(lobbyId).emit('set-ready', userId)
     })
 
     /* ---- GAME SETTINGS ---- */
-    socket.on('finalise-lobby', (list, lobby, lobbyId) => {
-        console.log("---------------------------------------")
-       io.to(lobbyId).emit('move-to-game')
-
+    socket.on('finalise-lobby', (playerList, lobbyId) => {
+        io.to(lobbyId).emit('move-to-game-state', playerList)
     })
+
+    socket.on('show-called', (lobbyId) => {
+        io.to(lobbyId).emit('set-show-true')
+    })
+
+    socket.on('reveal-hand', (userId, lobbyId) => {
+        io.to(lobbyId).emit('show-player-hand', userId)
+    })
+
+    
     
     socket.on('disconnect', () => {
         socket.removeAllListeners();   

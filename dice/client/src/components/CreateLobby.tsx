@@ -31,7 +31,7 @@ const CreateLobby: FC<PageProps> = ({ gameId, socket }) => {
   })
 
   useEffect(() => {
-    setHost(prev => ({...prev, icon: "/crew" + ((Math.abs(5 * counter) % 6 ) + 1) + ".png"}))
+    setHost(prev => ({...prev, icon: "/crew" + ((Math.abs(counter > 0 ? counter : 5 * counter) % 6 ) + 1) + ".png"}))
   }, [counter])
   
   useEffect(() => {
@@ -41,7 +41,7 @@ const CreateLobby: FC<PageProps> = ({ gameId, socket }) => {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     socket.emit('create-room', lobby)
-    router.push(`/lobby/${gameId}` )
+    router.push(`/game/${gameId}`)
   }
 
   const handleChange = (e: MouseEventHandler<HTMLInputElement> | any ) => {
@@ -64,7 +64,7 @@ const CreateLobby: FC<PageProps> = ({ gameId, socket }) => {
         <div className='flex mx-auto'>
           <button className='text-red text-7xl mx-5 font-bold' onClick={() => setCounter(count => count - 1)}>{"<"}</button>
           <Icon 
-              icon={"/crew" + ((Math.abs(5 * counter) % 6 ) + 1) + ".png"}
+              icon={"/crew" + ((Math.abs(counter > 0 ? counter : 5 * counter) % 6 ) + 1) + ".png"}
               size={200}
           />
           <button className='text-red text-7xl mx-5 font-bold' onClick={() => setCounter(count => count + 1)}>{">"}</button>

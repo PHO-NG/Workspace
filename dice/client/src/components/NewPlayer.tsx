@@ -18,9 +18,10 @@ const NewPlayer: FC<NewPlayerProps> = ({lobbyName, lobbyId, socket, updatePlayer
         name: "",
         icon: "",
     })
+    
 
     useEffect(() => {
-        setUserData(prev => ({...prev, icon: "/crew" + ((Math.abs(5 * counter) % 6 ) + 1) + ".png"}))
+        setUserData(prev => ({...prev, icon: "/crew" + ((Math.abs(counter > 0 ? counter : 5 * counter) % 6 ) + 1) + ".png"}))
     }, [counter])
 
     const handleClick = () => {
@@ -39,7 +40,7 @@ const NewPlayer: FC<NewPlayerProps> = ({lobbyName, lobbyId, socket, updatePlayer
                 <div className='flex mx-auto'>
                     <button className='text-red text-7xl mx-5 font-bold' onClick={() => setCounter(count => count - 1)}>{"<"}</button>
                     <Icon 
-                        icon={"/crew" + ((Math.abs(5 * counter) % 6 ) + 1) + ".png"}
+                        icon={"/crew" + ((Math.abs(counter > 0 ? counter : 5 * counter) % 6 ) + 1) + ".png"}
                         size={200}
                     />
                     <button className='text-red text-7xl mx-5 font-bold' onClick={() => setCounter(count => count + 1)}>{">"}</button>

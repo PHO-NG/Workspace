@@ -22,7 +22,7 @@ const Dice: FC<DiceProps> = ({dice, reveal, size}) => {
       <Die 
         face = {die}
         size = {size}
-        rotation = {true} 
+        rotation = {index} 
         reveal = {reveal}
         customStyle = {styles}
         key = {index}
