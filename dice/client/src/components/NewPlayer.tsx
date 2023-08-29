@@ -7,31 +7,28 @@ interface NewPlayerProps {
   lobbyName: string
   lobbyId: string
   socket: Socket
-
+//   newPlayerLoaded: boolean
+  updatePlayer: (bool : boolean) => void
 }
 
-const NewPlayer: FC<NewPlayerProps> = ({lobbyName, lobbyId, socket}) => {
+const NewPlayer: FC<NewPlayerProps> = ({lobbyName, lobbyId, socket, updatePlayer}) => {
     const [counter, setCounter] = useState(0)
-    const [userData, setUserData] = useState({
+    const [userData, setUserData] = useState<Player>({
+        id: socket.id,
         name: "",
-        icon: ""
+        icon: "",
     })
-
-    socket.on("get-userId", (arg) => {
-        setUserData(prev => ({...prev, id: arg}))
-        return () => {
-            socket.off('get-userId')
-        }
-    })
+    
 
     useEffect(() => {
-        setUserData(prev => ({...prev, icon: "/crew" + ((Math.abs(5 * counter) % 6 ) + 1) + ".png"}))
+        setUserData(prev => ({...prev, icon: "/crew" + ((Math.abs(counter > 0 ? counter : 5 * counter) % 6 ) + 1) + ".png"}))
     }, [counter])
 
     const handleClick = () => {
-        socket.emit('join-lobby', {...userData, lobbyId})
+        updatePlayer(true)
+        socket.emit('join-lobby', userData, lobbyId)
     }
-      
+
     return (
         <>
             <div className='flex flex-col z-30 w-3/12 h-3/5 border-red border-8 rounded-lg mx-auto fixed left-[37.5%] bottom-1/3 bg-black'>
@@ -43,7 +40,7 @@ const NewPlayer: FC<NewPlayerProps> = ({lobbyName, lobbyId, socket}) => {
                 <div className='flex mx-auto'>
                     <button className='text-red text-7xl mx-5 font-bold' onClick={() => setCounter(count => count - 1)}>{"<"}</button>
                     <Icon 
-                        icon={"/crew" + ((Math.abs(5 * counter) % 6 ) + 1) + ".png"}
+                        icon={"/crew" + ((Math.abs(counter > 0 ? counter : 5 * counter) % 6 ) + 1) + ".png"}
                         size={200}
                     />
                     <button className='text-red text-7xl mx-5 font-bold' onClick={() => setCounter(count => count + 1)}>{">"}</button>
@@ -53,8 +50,6 @@ const NewPlayer: FC<NewPlayerProps> = ({lobbyName, lobbyId, socket}) => {
             </div>
             <div className='w-screen h-screen opacity-50 z-10 border-2 absolute left-0 top-0 flex justify-center bg-black'></div>
         </>
-        
-        
     )
 }
 export default NewPlayer

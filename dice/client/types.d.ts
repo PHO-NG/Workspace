@@ -4,11 +4,25 @@ type Player = {
     icon: string
 }
 
-type PlayerStatus = Player & {
+type PlayerStatus = Player & ({
     ready: boolean
     filled: boolean
     loaded: boolean
-  }
+})
+
+type PlayerGameState = Player & {
+    dice: number[]
+    turn: boolean //turn to play
+    reveal: boolean
+    target: boolean
+}
+
+type TurnHistory = {
+    player: Player
+    target: Player
+    amountCalled: number
+    diceNumber: number
+}
 
 type Lobby = {
     lobbyId: string

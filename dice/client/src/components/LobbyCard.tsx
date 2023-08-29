@@ -10,11 +10,11 @@ type Props = {
     ready: boolean,
     filled: boolean,
     loaded: boolean
-    key: number
+    index: number
 }
 
 
-export default function LobbyCard({name, icon, ready, filled, loaded, key}: Props) {
+export default function LobbyCard({name, icon, ready, filled, loaded, index}: Props) {
   return (
     <div className='flex h-14 my-2'>
         <div className='-mt-1 relative '>
@@ -31,16 +31,16 @@ export default function LobbyCard({name, icon, ready, filled, loaded, key}: Prop
 
         {filled ?
         <div className='flex w-full'>
-            <div className={`w-3 h-full mx-3 ${ready ? 'bg-green' : 'bg-lightgray'}`}></div>   
-            {key == 1 &&
+            <div className={`w-3 h-full mx-3 ${ready || index == 0 ? 'bg-green' : 'bg-lightgray'}`}></div>   
+            {index == 0 &&
             <Icon 
                 icon="/host.png"
                 size={20}
                 styles='fixed ml-9 -mt-4' //change fixed
             />
             }
-            <div className={`w-full h-full ${ready ? "bg-[#2323237e]" : "bg-gray"}`}>
-                <h2 className='text-5xl my-1 ml-3'>{name}</h2>
+            <div className={`w-full h-full ${ready || index == 0 ? "bg-[#2323237e]" : "bg-gray"}`}>
+                <h2 className='text-5xl my-1 ml-3'>{name == "" ? "Loading..." : name}</h2>
             </div>
         </div>
          : 
