@@ -78,7 +78,9 @@ io.on('connection', (socket) => {
         io.to(lobbyId).emit('show-player-hand', userId)
     })
 
-    
+    socket.on('player-rolls', (userId, dice, lobbyId) => {
+        io.to(lobbyId).emit('show-player-hand', userId, dice)
+    })
     
     socket.on('disconnect', () => {
         socket.removeAllListeners();   

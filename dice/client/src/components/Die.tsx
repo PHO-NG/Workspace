@@ -6,14 +6,16 @@ interface DieProps {
   reveal: boolean
   rotation?: number
   customStyle? : {}
+  diceStyle? : {}
 }
 
-const Die: FC<DieProps> = ({face, size, reveal, rotation, customStyle}) => {
+const Die: FC<DieProps> = ({face, size, reveal, rotation, customStyle, diceStyle}) => {
     let styles = {
         height: size,
         width: size,
         rotate: rotation ? rotation * 60 + "deg" : 0 + "deg",
-        borderRadius: size/10
+        borderRadius: size/10,
+        ...diceStyle
     }
     let dotStyles = {
         height: size/5.5,

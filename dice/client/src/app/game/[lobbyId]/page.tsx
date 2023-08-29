@@ -138,7 +138,7 @@ const Page: FC = () => {
       }
     })
 
-    socket.on('move-to-game-state', (list) => {
+    socket.on('move-to-game-state', (list : PlayerGameState[]) => {
       setPlayerList(list)
       let tempHistory = [...turnHistory] as TurnHistory[]
       tempHistory.push({
