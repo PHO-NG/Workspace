@@ -32,6 +32,7 @@ const Game: FC<GameProps> = ({lobbyId, socket, playerList, turnHistory, amountSe
     reveal: false
   })
   const [historyMap, setHistoryMap] = useState<JSX.Element[]>()
+  const dieArr = [1,2,3,4,5,6]
 
   const handleReveal = () => {
     if (show == false) {
@@ -147,6 +148,25 @@ const Game: FC<GameProps> = ({lobbyId, socket, playerList, turnHistory, amountSe
     socket.emit('player-rolls', (socket.id, dice.dice, lobbyId))
   }
 
+  const amountOptions = amountSelection.map(amount => (
+    <button key={amount} className='w-[60px] h-[60px] mx-0.5 border-2 border-black bg-white rounded-md' onClick={() => setAmountSelected(amount)}
+      style={amountSelected === amount ? {boxShadow: "inset 0 0 10px black", backgroundColor: "lightgray"} : {filter: "drop-shadow(3px 3px 0px #000)"}}>
+        <h2 className='text-black text-4xl font-bold'>{amount}</h2>
+      </button>
+  ))
+
+  const dieOptions = dieArr.map(die => (
+    <button key={die} className='mx-1' onClick={() => setDiceSelected(die)}>
+        <Die 
+          face={die}
+          size={60}
+          reveal={true}
+          customStyle={diceSelected !== die && {filter: "drop-shadow(3px 3px 0px #000)"}}
+          diceStyle={diceSelected === die && {boxShadow: "inset 0 0 10px black", backgroundColor: "lightgray"}}
+        />
+      </button>
+  ))
+
   return <>
   {/* BOARD */}
   <div className='relative w-[600px] h-[321px] border-[12px] rounded-[150px] border-red mx-auto mt-24'>
@@ -155,83 +175,70 @@ const Game: FC<GameProps> = ({lobbyId, socket, playerList, turnHistory, amountSe
   </div>
 
   {/* MIDDLE SECTION */}
-  <div className='relative mx-auto w-2/6'>
-    <button className='absolute top-2/4 left-2/4 -translate-x-2/4 text-4xl border-red border-8 rounded-xl caret-transparent w-64 p-2'>TEST</button>
-    <div className='fixed bottom-[80px] left-2/4 -translate-x-2/4 bg-red rounded-lg p-1 -mb-1'>
-      <button className='w-[60px] h-[60px] border-2 border-black bg-white rounded-md' onClick={() => setAmountSelected(amountSelection[0])}
-      style={amountSelected === amountSelection[0] ? {boxShadow: "inset 0 0 10px black", backgroundColor: "lightgray"} : {}}>
-        <h2 className='text-black text-4xl font-bold'>{amountSelection[0]}</h2>
-      </button>
-      <button className='w-[60px] h-[60px] mx-1 border-2 border-black bg-white rounded-md' onClick={() => setAmountSelected(amountSelection[1])}
-      style={amountSelected === amountSelection[1] ? {boxShadow: "inset 0 0 10px black", backgroundColor: "lightgray"} : {}}>
-        <h2 className='text-black text-4xl font-bold'>{amountSelection[1]}</h2>
-      </button>
-      <button className='w-[60px] h-[60px] border-2 border-black bg-white rounded-md' onClick={() => setAmountSelected(amountSelection[2])}
-      style={amountSelected === amountSelection[2] ? {boxShadow: "inset 0 0 10px black", backgroundColor: "lightgray"} : {}}>
-        <h2 className='text-black text-4xl font-bold'>{amountSelection[2]}</h2>
-      </button>
+  <div className='fixed bottom-0 left-2/4 -translate-x-2/4'>
+    <button className='absolute left-2/4 -translate-x-2/4 text-4xl border-red border-8 rounded-xl caret-transparent w-64 p-2 flex'>
+      
+      {(amountSelected !== 0 && diceSelected !== 0) ? 
+      <div className='flex ml-8 -mb-1'>
+        <h2 className='text-4xl -ml-8'>GUESS:</h2>
+        <h2 className='text-4xl ml-6 mr-2'>{amountSelected}</h2>
+        {/* <div className='-mt-1'> */}
+          <Die 
+            face = {diceSelected}
+            size = {45}
+            reveal = {true}
+            customStyle={{marginTop: "-1px"}}
+          />
+        {/* </div> */}
+      </div>
+      :
+      <h2 className='mx-auto'>GUESS</h2>
+      }
+    </button>
+    <div className='flex mx-auto w-min mt-24'>
+      <h2 className='text-4xl text-white mt-6'>TARGET:</h2>
+      <button className='text-red text-3xl ml-3 -mt-3 font-bold'>{"<"}</button>
+      <div className='flex flex-col '>
+        <div className='mx-auto'>
+          <PlayerIcons 
+            icon = {'/crew6.png'}
+            size = {70}
+          />
+        </div>
+        <h2 className='whitespace-nowrap'>TARGET NAME</h2>
+      </div>
+      <button className='text-red text-3xl mr-3 -mt-3 font-bold'>{">"}</button>
     </div>
-    <div className='fixed bottom-[0] left-2/4 -translate-x-2/4 bg-red rounded-lg pt-1'>
-      <button className='mx-1' onClick={() => setDiceSelected(1)} style={{filter: "drop-shadow(3px 3px 0px #000)"}}>
-        <Die 
-          face={1}
-          size={60}
-          reveal={true}
-          diceStyle={diceSelected === 1 && {boxShadow: "inset 0 0 10px black", backgroundColor: "lightgray"}}
-        />
-      </button>
-      <button className='mx-1' onClick={() => setDiceSelected(2)} style={{filter: "drop-shadow(3px 3px 0px #000)"}}>
-        <Die 
-          face={2}
-          size={60}
-          reveal={true}
-          diceStyle={diceSelected === 2 && {boxShadow: "inset 0 0 10px black", backgroundColor: "lightgray"}}
-        />
-      </button>
-      <button className='mx-1' onClick={() => setDiceSelected(3)} style={{filter: "drop-shadow(3px 3px 0px #000)"}}>
-        <Die 
-          face={3}
-          size={60}
-          reveal={true}
-          diceStyle={diceSelected === 3 && {boxShadow: "inset 0 0 10px black", backgroundColor: "lightgray"}}
-        />
-      </button>
-      <button className='mx-1' onClick={() => setDiceSelected(4)} style={{filter: "drop-shadow(3px 3px 0px #000)"}}>
-        <Die 
-          face={4}
-          size={60}
-          reveal={true}
-          diceStyle={diceSelected === 4 && {boxShadow: "inset 0 0 10px black", backgroundColor: "lightgray"}}
-        />
-      </button>
-      <button className='mx-1' onClick={() => setDiceSelected(5)} style={{filter: "drop-shadow(3px 3px 0px #000)"}}>
-        <Die
-          face={5}
-          size={60}
-          reveal={true}
-          diceStyle={diceSelected === 5 && {boxShadow: "inset 0 0 10px black", backgroundColor: "lightgray"}}
-        />
-      </button>
-      <button className='mr-2 ml-1' onClick={() => setDiceSelected(6)} style={{filter: "drop-shadow(3px 3px 0px #000)"}}>
-        <Die
-          face={6}
-          size={60}
-          reveal={true}
-          diceStyle={diceSelected === 6 && {boxShadow: "inset 0 0 10px black", backgroundColor: "lightgray"}}
-        />
-      </button>
+    <div className='mx-auto bg-red flex w-min rounded-lg p-1 -mb-1 mt-6'>
+      {amountOptions}
+    </div>
+    <div className='mx-auto mt-2 bg-red rounded-lg pt-1'>
+      {dieOptions}
     </div>
   </div>
 
   {/* RIGHT SECTION */}
-  <div className='fixed bottom-0 left-3/4 -translate-x-2/4 -mb-12'>
+  <div className='fixed bottom-0 left-3/4 -translate-x-2/4 -mb-8'>
     <Dice
       dice = {dice.dice}
       reveal = {true}
       size = {80}
     />
+    {show === false && <button onClick={handleRoll}> 
+    {/* change to turnhistory == 0 when it starts working */}
+      <Image 
+        src={'/reroll.png'}
+        className={'absolute top-1/4 -translate-y-1/4 left-1/2 -translate-x-2/4'}
+        width={90}
+        height={0}
+        alt={'/reroll.png'}
+        priority={true}
+        placeholder={"blur"}
+        blurDataURL={'/reroll.png'}
+      />
+    </button>}
   </div>
-  {/* <button onClick={handleRoll}> </button> */}
+  
 
   {/* LEFT SECTION */}
   <div className='fixed bottom-0 left-1/4 -translate-x-3/4'>
