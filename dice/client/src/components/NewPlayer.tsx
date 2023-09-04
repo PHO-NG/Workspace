@@ -15,7 +15,7 @@ const NewPlayer: FC<NewPlayerProps> = ({lobbyName, lobbyId, socket, updatePlayer
     const [counter, setCounter] = useState(0)
     const [userData, setUserData] = useState<Player>({
         id: socket.id,
-        name: "",
+        name: "New Player",
         icon: "",
     })
     

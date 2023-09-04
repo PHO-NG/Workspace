@@ -6,6 +6,7 @@ import { io } from 'socket.io-client'
 import CreateLobby from '@/components/CreateLobby';
 import Title from '@/components/Title/Title';
 import './globals.css'
+import TimerButton from '@/components/TimerButton/TimerButton';
 
 
 

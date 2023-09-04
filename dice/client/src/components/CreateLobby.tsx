@@ -60,7 +60,7 @@ const CreateLobby: FC<PageProps> = ({ gameId, socket }) => {
 
   return (
     <div className="flex">
-      <div className='flex flex-col w-3/12 mx-16'>
+      <div className='flex flex-col w-4/12 mx-16 '>
         <div className='flex mx-auto'>
           <button className='text-red text-7xl mx-5 font-bold' onClick={() => setCounter(count => count - 1)}>{"<"}</button>
           <Icon 
@@ -75,7 +75,7 @@ const CreateLobby: FC<PageProps> = ({ gameId, socket }) => {
         />
       </div>
 
-      <form className='flex flex-col mr-[20%] w-8/12' onSubmit={handleSubmit}>
+      <form className='flex flex-col mr-[20%] w-7/12' onSubmit={handleSubmit}>
         <div className='flex mx-5 my-2 w-auto'>
           <label className='text-3xl mr-10 whitespace-nowrap' htmlFor="lobbyName">ROOM NAME:</label>
           <input className='text-3xl border-white opacity-80 bg-black border-2 w-[60%] focus:outline-none focus:opacity-100 pl-3' 

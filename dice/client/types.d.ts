@@ -15,6 +15,7 @@ type PlayerGameState = Player & {
     turn: boolean //turn to play
     reveal: boolean
     target: boolean
+    rerolled?: boolean
 }
 
 type TurnHistory = {

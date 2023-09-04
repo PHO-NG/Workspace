@@ -36,7 +36,7 @@ export default function LobbyCard({name, icon, ready, filled, loaded, index}: Pr
             <Icon 
                 icon="/host.png"
                 size={20}
-                styles='fixed ml-9 -mt-4' //change fixed
+                styles='absolute ml-9 -mt-4' //change fixed
             />
             }
             <div className={`w-full h-full ${ready || index == 0 ? "bg-[#2323237e]" : "bg-gray"}`}>

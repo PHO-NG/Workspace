@@ -7,9 +7,9 @@ import PlayerIcons from '@/components/PlayerIcons'
 import Die from '@/components/Die'
 import Dice from '@/components/Dice'
 import Loading from '@/app/game/[lobbyId]/loading'
+import TimerButton from './TimerButton/TimerButton'
 
 interface GameProps {
-  lobbyId: string
   socket: Socket
   playerList: PlayerGameState[]
   turnHistory: TurnHistory[]
@@ -25,8 +25,11 @@ type PlayerDice = {
   reveal: boolean
 }
 
-const Game: FC<GameProps> = ({lobbyId, socket, playerList, turnHistory, amountSelection, amountSelected, setAmountSelected, diceSelected, setDiceSelected}) => {
+const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, amountSelected, setAmountSelected, diceSelected, setDiceSelected}) => {
   const [show, setShow] = useState<boolean>(false)
+  const [curTurn, setCurTurn] = useState<Player>()
+  const [curTarget, setCurTarget] = useState<Player>()
+  const [rerolled, setRerolled] = useState<boolean>(false)
   const [dice, setDice] = useState<PlayerDice>({
     dice: [0,0,0,0,0],
     reveal: false
@@ -34,14 +37,6 @@ const Game: FC<GameProps> = ({lobbyId, socket, playerList, turnHistory, amountSe
   const [historyMap, setHistoryMap] = useState<JSX.Element[]>()
   const dieArr = [1,2,3,4,5,6]
 
-  const handleReveal = () => {
-    if (show == false) {
-      socket.emit('show-called', lobbyId)
-    } else {
-      socket.emit('reveal-hand', socket.id, lobbyId)
-    }
-  }
-  
   useEffect(() => {
     const index = playerList.findIndex(player => player.id === socket.id)
     setDice({dice: playerList[index].dice, reveal: playerList[index].reveal})
@@ -62,7 +57,7 @@ const Game: FC<GameProps> = ({lobbyId, socket, playerList, turnHistory, amountSe
   const calculatePosition = (player: PlayerGameState, index : number) => {   
     let variance = playerList.length % 2 == 1 ? (index == 0 ? 0 : 20) : 0;
     const angle = (360 / playerList.length) *  Math.PI/180 * index
-    const playerXPos = 260 + ((Math.sin(angle)) * 380)
+    const playerXPos = 260 + ((Math.sin(angle)) * 380) - ((360 * index) / playerList.length > 200 ? 30 : 0)
     const playerYPos = (index == 0 ? 130 : 100) - (Math.cos(angle) * 230) + variance
     const playerStyles = {
       left: playerXPos,  
@@ -76,12 +71,19 @@ const Game: FC<GameProps> = ({lobbyId, socket, playerList, turnHistory, amountSe
     }
     return <div key={index}>
       <Suspense fallback={<Loading />}>
-        <div className={`absolute text-center ${(player.target || player.turn) === false && 'opacity-30'}`} style={playerStyles}>
-          <h2 className='caret-transparent'>{player.name}</h2>
-          <PlayerIcons 
-              icon={player.icon}
-              size={50}
-          />
+        <div className={`absolute border border-red w-max text-center ${(player.target || player.turn) === false && 'opacity-30'}`} style={playerStyles}>
+          <h2 className='caret-transparent text-center'>{player.name}</h2>
+          <div className='relative mx-auto w-max'>
+            <PlayerIcons 
+                icon={player.icon}
+                size={50}
+            />
+            {/* {rerolled == true && <div>
+              <div className='absolute -left-10 top-0 w-32 h-5/6 border-x-4  border-red rounded-full'></div>
+              <div className='absolute -left-113 top-0 w-40 h-5/6 border-x-6  border-red rounded-full'></div>
+            </div>} */}
+          </div>
+          
         </div>
         
         <div className='absolute' style={diceStyles}>
@@ -124,7 +126,7 @@ const Game: FC<GameProps> = ({lobbyId, socket, playerList, turnHistory, amountSe
               className={`mt-6 align-center ${index === (turnHistory.length - 1) && 'mx-2'}`}
               width={index === (turnHistory.length - 1) ? 300 : 100}
               height={0}
-              alt={'/arrow3.png'}
+              alt={'arrow'}
               priority={true}
               placeholder={"blur"}
               blurDataURL={'/arrow3.png'}
@@ -141,12 +143,6 @@ const Game: FC<GameProps> = ({lobbyId, socket, playerList, turnHistory, amountSe
       ))) 
     }
   }, [turnHistory])
-
-  const handleRoll = () => {
-    setDice(prev => ({...prev,
-    dice: Array.from({length: 5}, () => Math.floor(Math.random() * 6) + 1)}))
-    socket.emit('player-rolls', (socket.id, dice.dice, lobbyId))
-  }
 
   const amountOptions = amountSelection.map(amount => (
     <button key={amount} className='w-[60px] h-[60px] mx-0.5 border-2 border-black bg-white rounded-md' onClick={() => setAmountSelected(amount)}
@@ -167,6 +163,31 @@ const Game: FC<GameProps> = ({lobbyId, socket, playerList, turnHistory, amountSe
       </button>
   ))
 
+  const handleRoll = () => {
+    const tempDice : number[] = Array.from({length: 5}, () => Math.floor(Math.random() * 6) + 1)
+    setDice(prev => ({...prev,
+    dice: tempDice}))
+    socket.emit('player-rolls', socket.id, tempDice)
+    setRerolled(true)
+  }
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (rerolled) {
+        setRerolled(false)
+      }}, 1000)
+    return () => clearTimeout(timeout)
+  }, [rerolled])
+
+  const handleReveal = () => {
+    if (show == false) {
+      socket.emit('show-called')
+    } else {
+      socket.emit('reveal-hand', socket.id)
+    }
+  }
+
+
   return <>
   {/* BOARD */}
   <div className='relative w-[600px] h-[321px] border-[12px] rounded-[150px] border-red mx-auto mt-24'>
@@ -176,30 +197,32 @@ const Game: FC<GameProps> = ({lobbyId, socket, playerList, turnHistory, amountSe
 
   {/* MIDDLE SECTION */}
   <div className='fixed bottom-0 left-2/4 -translate-x-2/4'>
-    <button className='absolute left-2/4 -translate-x-2/4 text-4xl border-red border-8 rounded-xl caret-transparent w-64 p-2 flex'>
-      
+    <div>
+      <TimerButton 
+        duration={20}
+        turn={true}
+      />
       {(amountSelected !== 0 && diceSelected !== 0) ? 
-      <div className='flex ml-8 -mb-1'>
-        <h2 className='text-4xl -ml-8'>GUESS:</h2>
-        <h2 className='text-4xl ml-6 mr-2'>{amountSelected}</h2>
-        {/* <div className='-mt-1'> */}
-          <Die 
-            face = {diceSelected}
-            size = {45}
-            reveal = {true}
-            customStyle={{marginTop: "-1px"}}
-          />
-        {/* </div> */}
-      </div>
-      :
-      <h2 className='mx-auto'>GUESS</h2>
+        <div className='flex ml-8 -mb-1'>
+          <h2 className='text-4xl -ml-8'>GUESS:</h2>
+          <h2 className='text-4xl ml-6 mr-2'>{amountSelected}</h2>
+            <Die 
+              face = {diceSelected}
+              size = {45}
+              reveal = {true}
+              customStyle={{marginTop: "-1px"}}
+            />
+          {/* </div> */}
+        </div>
+        :
+        <h2 className='mx-auto'>GUESS</h2>
       }
-    </button>
+    </div>
     <div className='flex mx-auto w-min mt-24'>
       <h2 className='text-4xl text-white mt-6'>TARGET:</h2>
       <button className='text-red text-3xl ml-3 -mt-3 font-bold'>{"<"}</button>
       <div className='flex flex-col '>
-        <div className='mx-auto'>
+        <div className='relative mx-auto'>
           <PlayerIcons 
             icon = {'/crew6.png'}
             size = {70}
@@ -231,7 +254,7 @@ const Game: FC<GameProps> = ({lobbyId, socket, playerList, turnHistory, amountSe
         className={'absolute top-1/4 -translate-y-1/4 left-1/2 -translate-x-2/4'}
         width={90}
         height={0}
-        alt={'/reroll.png'}
+        alt={'reroll'}
         priority={true}
         placeholder={"blur"}
         blurDataURL={'/reroll.png'}

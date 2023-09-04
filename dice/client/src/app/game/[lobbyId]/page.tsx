@@ -33,7 +33,6 @@ const Page: FC = () => {
   const [diceSelected, setDiceSelected] = useState<number>(0)
   const [amountSelected, setAmountSelected] = useState<number>(0)
   const [turnHistory, setTurnHistory] = useState<TurnHistory[]>([])
-  
 
   /* ---- GET RID OF RERENDERING BUG ---- */
   const [text, setText] = useState({
@@ -48,18 +47,12 @@ const Page: FC = () => {
     socket.on('initilise-lobby', (lobbyData, host) => {
       if (lobbySettings.lobbyName === "") {
         setLobbySettings(lobbyData)
+        setText(prev => ({...prev, button: host ? "START GAME" : "READY"}))
         if (host) {
           let tempList = [...playerList] as PlayerStatus[]
-          const index = playerList.findIndex(player => player.id === socket.id)
-          if (index === -1) {
-            tempList.push({...lobbyData.host, id: socket.id, ready: false, filled: true, loaded: true})
-          } 
+          tempList.push({...lobbyData.host, id: socket.id, ready: false, filled: true, loaded: true})
           setPlayerList(tempList)
           setNewPlayerLoaded(true)
-          setText(prev => ({...prev, button: "START GAME"}))
-        }
-        else {
-          setText(prev => ({...prev, button: "READY"}))
         }
       }
     })
@@ -76,14 +69,14 @@ const Page: FC = () => {
     }  
   }, [lobbySettings])
 
+
   /* ---- UPDATE LIST WHEN ACTION OCCURS ---- */
   useEffect(() => {
     /* ---- LOBBY FUNCTIONALITY ---- */
-    socket.emit('update-playerList', lobbyId, socket.id)
-
+    socket.emit('add-new-player-to-playerList', socket.id)
     socket.on('get-and-update-playerList', (userId) => {
-      let tempList = [...playerList] as PlayerStatus[]
-      if ((tempList.findIndex(player => player.id == userId) === -1)) {
+      if ((playerList.findIndex(player => player.id == userId) === -1) && playerList.length > 0) {
+        let tempList = [...playerList] as PlayerStatus[]
         if (userId != null) {
           tempList.push({
             id: userId,
@@ -92,10 +85,10 @@ const Page: FC = () => {
             ready: false,
             filled: true,
             loaded: false
-          })
-        }
+          })  
+        }    
         setPlayerList(tempList)
-        socket.emit('playerList', lobbyId, tempList)        
+        socket.emit('send-playerList-to-all', tempList)
       }
     })
 
@@ -110,7 +103,7 @@ const Page: FC = () => {
       if (index !== -1) {
         tempList[index] = {...tempList[index], ...userData, loaded: true}
         setPlayerList(tempList)
-        socket.emit('playerList', lobbyId, tempList)
+        socket.emit('playerList', tempList)
       }
     })
 
@@ -128,32 +121,32 @@ const Page: FC = () => {
             reveal: false,
             target: index === 1 ? true : false
           }))
-          socket.emit('finalise-lobby', tempList, lobbyId)
+          socket.emit('finalise-lobby', tempList)
         } else {
           let tempList = [...playerList] as PlayerStatus[]
           tempList[index] = {...tempList[index], ready: !tempList[index].ready}
           setPlayerList(tempList)
-          socket.emit('playerList', lobbyId, tempList)
+          socket.emit('playerList', tempList)
         }
       }
     })
 
     socket.on('move-to-game-state', (list : PlayerGameState[]) => {
       setPlayerList(list)
-      let tempHistory = [...turnHistory] as TurnHistory[]
-      tempHistory.push({
-        player: list[0],
-        target: list[1],
-        amountCalled: 3,
-        diceNumber: 4
-      })
-      tempHistory.push({
-        player: list[1],
-        target: list[0],
-        amountCalled: 6,
-        diceNumber: 6
-      })
-      setTurnHistory(tempHistory)
+      // let tempHistory = [...turnHistory] as TurnHistory[]
+      // tempHistory.push({
+      //   player: list[0],
+      //   target: list[1],
+      //   amountCalled: 3,
+      //   diceNumber: 4
+      // })
+      // tempHistory.push({
+      //   player: list[1],
+      //   target: list[0],
+      //   amountCalled: 6,
+      //   diceNumber: 6
+      // })
+      // setTurnHistory(tempHistory)
       setStartGame(true)
     })
 
@@ -165,14 +158,37 @@ const Page: FC = () => {
       setPlayerList(tempList)
     })
 
+    socket.on('show-player-rerolls', (userId, dice) => {
+      let tempList = [...playerList] as PlayerGameState[]
+      const index = tempList.findIndex(player => player.id === userId)
+      tempList[index] = {...tempList[index], dice: dice}
+      setPlayerList(tempList)
+    })
+
+    /* ---- DISCONNECT FUNCTIONALITY ---- */
+    socket.on('disconnect-all', () => {
+      alert("Host Disconnected")
+    })
+
+    socket.on('remove-player', (userId) => {
+      let tempList = [...playerList]
+      const index = tempList.findIndex(player => player.id === userId)
+      if (index !== -1) {
+        tempList.splice(index, 1)
+        socket.emit('playerList', tempList)
+      }
+    })
+
     return () => {
-      socket.off('get-lobby-state')
-      socket.off('lobby-state-from-server')
       socket.off('get-and-update-playerList')
       socket.off('playerList-from-server')
+      socket.off('lobby-state-from-server')
       socket.off('finalise-player')
       socket.off('set-ready')
       socket.off('move-to-game-state')
+      socket.off('show-player-hand')
+      socket.off('show-player-rerolls')
+      socket.off('disconnect-all')
     }
   }, [playerList])
    
@@ -181,7 +197,14 @@ const Page: FC = () => {
       startGame == false ?
       <Suspense fallback={<Loading />}>
         <div>
-        {newPlayerLoaded == false && <NewPlayer lobbyName={lobbySettings.lobbyName} lobbyId={lobbySettings.lobbyId} socket={socket} updatePlayer={(bool : boolean) => setNewPlayerLoaded(bool)}/>}
+        {newPlayerLoaded == false && 
+          <NewPlayer 
+          lobbyName={lobbySettings.lobbyName} 
+          lobbyId={lobbySettings.lobbyId} 
+          socket={socket} 
+          updatePlayer={(bool : boolean) => setNewPlayerLoaded(bool)}
+          />
+        }
         <Lobby 
           playerList = {playerList as PlayerStatus[]}
           lobbySettings = {lobbySettings}
@@ -193,7 +216,6 @@ const Page: FC = () => {
       :
       <Suspense fallback={<Loading />}>
         <Game
-          lobbyId = {lobbyId} 
           socket = {socket}
           playerList = {playerList as PlayerGameState[]}
           amountSelected = {amountSelected}

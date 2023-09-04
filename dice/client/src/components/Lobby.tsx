@@ -1,7 +1,10 @@
 'use client'
 import { FC, useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
+import { usePathname } from 'next/navigation'
 import { Socket } from 'socket.io-client'
+import { Tooltip as ReactTooltip } from "react-tooltip"
 
 import Title from '@/components/Title/Title'
 import LobbyCard from '@/components/LobbyCard'
@@ -20,6 +23,8 @@ interface LobbyProps {
 
 const Lobby: FC<LobbyProps> = ({playerList, lobbySettings, socket, text}) => {
     const [lobbyMap, setLobbyMap] = useState<JSX.Element[]>()
+    const url = "http://localhost:3000" + usePathname()
+    const [copied, setCopied] = useState<boolean>(false)
 
     useEffect(() => {
         if (playerList != undefined) {
@@ -43,9 +48,22 @@ const Lobby: FC<LobbyProps> = ({playerList, lobbySettings, socket, text}) => {
         }
       }, [playerList])
 
+      useEffect(() => {
+        const timeout = setTimeout(() => {
+          if (copied) {
+            setCopied(false)
+          }}, 1000)
+        return () => clearTimeout(timeout)
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [copied])
+
       const handleClick = () => {
-        socket.emit('player-ready', socket.id, lobbySettings.lobbyId)
-        console.log("PRESSED BUTTON")
+        socket.emit('player-ready', socket.id)
+      }
+
+      const handleCopy = () => {
+        navigator.clipboard.writeText(url)
+        setCopied(true)
       }
 
     return <>
@@ -68,11 +86,34 @@ const Lobby: FC<LobbyProps> = ({playerList, lobbySettings, socket, text}) => {
           </div>
         </div>
 
-        <div className='w-5/12'>
-          <h2 className='text-4xl'>ROOM NAME: {lobbySettings?.lobbyName}</h2>
+        <div className='relative w-5/12'>
+          <h2 className='text-4xl'>ROOM NAME: {lobbySettings?.lobbyName !== undefined ? lobbySettings.lobbyName : ""}</h2>
           <h2 className='text-4xl my-3'>INITIAL AMOUNT: {text.initialAmount}</h2>
-          <div className='flex'>
-            <h2 className='text-4xl'>RE-ROLL DICE: {text.reroll} </h2>
+          <h2 className='text-4xl'>RE-ROLL DICE: {text.reroll} </h2>
+          <div className='absolute bottom-24 w-full'>
+            <h2 className='text-xl ml-2'>Share lobby link</h2>
+            <div className='relative bg-[#2323237e] py-1 px-2 w-10/12 flex'>
+              <h2 className='text-xl'>{url}</h2>
+              {/* <button onClick={() => navigator.clipboard.writeText(url)}>TEST</button> */}
+              <button onClick={handleCopy} className='ml-auto'> 
+                <div data-tooltip-id="copytoclipboard" className={copied ? 'ease-in-out duration-300 border-2 border-[#54000e9c] p-1 -m-1 rounded-lg' : 'duration-150 ease-out border-[#54000e9c]'}>
+                  <Image 
+                    src={'/copy.png'}
+                    width={20}
+                    height={20}
+                    alt={'copy'}
+                    priority={true}
+                    placeholder={"blur"}
+                    blurDataURL={'/copy.png'}
+                  />
+                  <ReactTooltip
+                    id="copytoclipboard"
+                    place="bottom"
+                    content={copied ? "Copied!" : "Click to copy"}
+                  />
+                </div>
+              </button>
+            </div>
           </div>
         </div>
 
