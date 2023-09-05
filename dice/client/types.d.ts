@@ -14,7 +14,6 @@ type PlayerGameState = Player & {
     dice: number[]
     turn: boolean //turn to play
     reveal: boolean
-    target: boolean
     rerolled?: boolean
 }
 

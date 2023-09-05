@@ -12,9 +12,8 @@ Next.JS/Typescript/React/Socket.IO/Express
 **Solo project**
 
 ## Key skills learnt
- - Fundamentals of Next.JS and Socket.IO
- - Reinforce Full stack principles for web applications
-
+ - Fundamentals of Next.JS and Socket.IO.
+ - Reinforce Full stack principles for web applications, Typescript and React.
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
@@ -36,7 +35,6 @@ $ npm run server
 
 on your local machine.
 
-To run the project in a production setting, simply
-
+To run the project in a production setting,
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.

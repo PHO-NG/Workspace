@@ -119,7 +119,6 @@ const Page: FC = () => {
             dice: Array.from({length: 5}, () => Math.floor(Math.random() * 6) + 1),
             turn: index === 0 ? true: false,
             reveal: false,
-            target: index === 1 ? true : false
           }))
           socket.emit('finalise-lobby', tempList)
         } else {
@@ -133,20 +132,6 @@ const Page: FC = () => {
 
     socket.on('move-to-game-state', (list : PlayerGameState[]) => {
       setPlayerList(list)
-      // let tempHistory = [...turnHistory] as TurnHistory[]
-      // tempHistory.push({
-      //   player: list[0],
-      //   target: list[1],
-      //   amountCalled: 3,
-      //   diceNumber: 4
-      // })
-      // tempHistory.push({
-      //   player: list[1],
-      //   target: list[0],
-      //   amountCalled: 6,
-      //   diceNumber: 6
-      // })
-      // setTurnHistory(tempHistory)
       setStartGame(true)
     })
 
@@ -197,12 +182,13 @@ const Page: FC = () => {
       startGame == false ?
       <Suspense fallback={<Loading />}>
         <div>
-        {newPlayerLoaded == false && 
+        {newPlayerLoaded == false && playerList.length > 0 &&
           <NewPlayer 
           lobbyName={lobbySettings.lobbyName} 
           lobbyId={lobbySettings.lobbyId} 
           socket={socket} 
           updatePlayer={(bool : boolean) => setNewPlayerLoaded(bool)}
+          index={playerList.length}
           />
         }
         <Lobby 

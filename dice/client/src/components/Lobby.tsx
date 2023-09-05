@@ -82,15 +82,15 @@ const Lobby: FC<LobbyProps> = ({playerList, lobbySettings, socket, text}) => {
               </div>
             </div>
             }
-            <button onClick={handleClick} className='text-4xl border-red border-8 rounded-xl w-64 m-auto p-2'>{text.button}</button>
+            <button onClick={handleClick} className='text-4xl border-red border-8 rounded-xl w-64 m-auto p-2'>{text.button ? text.button : "READY"}</button>
           </div>
         </div>
 
-        <div className='relative w-5/12'>
+        <div className='relative w-5/12 h-[420px]'>
           <h2 className='text-4xl'>ROOM NAME: {lobbySettings?.lobbyName !== undefined ? lobbySettings.lobbyName : ""}</h2>
           <h2 className='text-4xl my-3'>INITIAL AMOUNT: {text.initialAmount}</h2>
           <h2 className='text-4xl'>RE-ROLL DICE: {text.reroll} </h2>
-          <div className='absolute bottom-24 w-full'>
+          <div className='absolute bottom-0 w-full'>
             <h2 className='text-xl ml-2'>Share lobby link</h2>
             <div className='relative bg-[#2323237e] py-1 px-2 w-10/12 flex'>
               <h2 className='text-xl'>{url}</h2>

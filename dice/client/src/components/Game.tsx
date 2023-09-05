@@ -27,19 +27,21 @@ type PlayerDice = {
 
 const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, amountSelected, setAmountSelected, diceSelected, setDiceSelected}) => {
   const [show, setShow] = useState<boolean>(false)
-  const [curTurn, setCurTurn] = useState<Player>()
-  const [curTarget, setCurTarget] = useState<Player>()
+  const [curTurn, setCurTurn] = useState<boolean>()
   const [rerolled, setRerolled] = useState<boolean>(false)
   const [dice, setDice] = useState<PlayerDice>({
     dice: [0,0,0,0,0],
     reveal: false
   })
   const [historyMap, setHistoryMap] = useState<JSX.Element[]>()
+  const [timer, setTimer] = useState<number>(0)
   const dieArr = [1,2,3,4,5,6]
 
   useEffect(() => {
-    const index = playerList.findIndex(player => player.id === socket.id)
+    let index = playerList.findIndex(player => player.id === socket.id)
     setDice({dice: playerList[index].dice, reveal: playerList[index].reveal})
+    index = playerList.findIndex(player => player.turn === true)
+    setCurTurn(playerList[index].id === socket.id ? true : false)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playerList]) //fix this later
 
@@ -71,7 +73,7 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
     }
     return <div key={index}>
       <Suspense fallback={<Loading />}>
-        <div className={`absolute border border-red w-max text-center ${(player.target || player.turn) === false && 'opacity-30'}`} style={playerStyles}>
+        <div className={`absolute border border-red w-max text-center ${player.turn === false && 'opacity-30'}`} style={playerStyles}>
           <h2 className='caret-transparent text-center'>{player.name}</h2>
           <div className='relative mx-auto w-max'>
             <PlayerIcons 
@@ -200,25 +202,25 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
     <div>
       <TimerButton 
         duration={20}
-        turn={true}
+        turn={curTurn ? curTurn : false}
       />
       {(amountSelected !== 0 && diceSelected !== 0) ? 
-        <div className='flex ml-8 -mb-1'>
+        <div className='absolute top-4 left-24 flex ml-8 mt-1'>
           <h2 className='text-4xl -ml-8'>GUESS:</h2>
-          <h2 className='text-4xl ml-6 mr-2'>{amountSelected}</h2>
+          <h2 className='text-4xl ml-4 mr-2'>{amountSelected}</h2>
             <Die 
               face = {diceSelected}
               size = {45}
               reveal = {true}
-              customStyle={{marginTop: "-1px"}}
+              customStyle={{marginTop: "-2px"}}
             />
           {/* </div> */}
         </div>
         :
-        <h2 className='mx-auto'>GUESS</h2>
+        <h2 className='absolute top-4 left-36 ml-2 mt-1 mx-auto text-4xl'>GUESS</h2>
       }
     </div>
-    <div className='flex mx-auto w-min mt-24'>
+    <div className='flex mx-auto w-min mt-10'>
       <h2 className='text-4xl text-white mt-6'>TARGET:</h2>
       <button className='text-red text-3xl ml-3 -mt-3 font-bold'>{"<"}</button>
       <div className='flex flex-col '>

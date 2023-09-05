@@ -1,4 +1,4 @@
-import { FC, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import './styles.css'
 
 interface TimerButtonProps {
@@ -7,7 +7,7 @@ interface TimerButtonProps {
 }
 
 const TimerButton: FC<TimerButtonProps> = ({duration, turn}) => {
-  const [pause, setPause] = useState(false)
+  const [pause, setPause] = useState<boolean>(false)
 
   const rectangleStyle = {
     "backgroundColor": turn ? "#54000E" : "#3F3F3F",
@@ -35,7 +35,7 @@ const TimerButton: FC<TimerButtonProps> = ({duration, turn}) => {
   }
 
   return <>
-    <div className="rectangle caret-transparent" onClick={(handleClick)}>
+    <div className="relative rectangle caret-transparent" onClick={(handleClick)}>
       <div className="right" style={{...rectangleStyle, ...rightStyle, }}></div>
       <div className="bottom" style={{...rectangleStyle, ...bottomStyle}}></div> 
       <div className="left" style={{...rectangleStyle, ...leftStyle}}></div>
