@@ -27,7 +27,8 @@ type PlayerDice = {
 
 const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, amountSelected, setAmountSelected, diceSelected, setDiceSelected}) => {
   const [show, setShow] = useState<boolean>(false)
-  const [curTurn, setCurTurn] = useState<boolean>()
+  const [curTurn, setCurTurn] = useState<Player>()
+  const [curTurnTarget, setCurTurnTarget] = useState<Player>()
   const [rerolled, setRerolled] = useState<boolean>(false)
   const [dice, setDice] = useState<PlayerDice>({
     dice: [0,0,0,0,0],
@@ -38,10 +39,17 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
   const dieArr = [1,2,3,4,5,6]
 
   useEffect(() => {
-    let index = playerList.findIndex(player => player.id === socket.id)
-    setDice({dice: playerList[index].dice, reveal: playerList[index].reveal})
-    index = playerList.findIndex(player => player.turn === true)
-    setCurTurn(playerList[index].id === socket.id ? true : false)
+    const playerIndex = playerList.findIndex(player => player.id === socket.id)
+    setDice({dice: playerList[playerIndex].dice, reveal: playerList[playerIndex].reveal})
+
+    // if (playerList.length === 2) {
+    //   setTargets([playerList[(playerIndex + 1) % 2]])
+    // } else {
+    //   setTargets([playerList[playerIndex === 0 ? playerList.length - 1 : playerIndex - 1], playerList[playerIndex === playerList.length - 1 ? 0 : playerIndex + 1]])
+    // }
+    
+    const currentTurnIndex = playerList.findIndex(player => player.turn === true)
+    setCurTurn(playerList[currentTurnIndex])
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playerList]) //fix this later
 
@@ -73,8 +81,8 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
     }
     return <div key={index}>
       <Suspense fallback={<Loading />}>
-        <div className={`absolute border border-red w-max text-center ${player.turn === false && 'opacity-30'}`} style={playerStyles}>
-          <h2 className='caret-transparent text-center'>{player.name}</h2>
+        <div className={`absolute w-max text-center ${player.turn === false && 'opacity-30'}`} style={playerStyles}>
+          <h2 className='text-center'>{player.name}</h2>
           <div className='relative mx-auto w-max'>
             <PlayerIcons 
                 icon={player.icon}
@@ -189,6 +197,19 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
     }
   }
 
+  const handleTargetSelection = () => {
+    // if (playerList.length === 2) {
+    //   setTargets([playerList[(playerIndex + 1) % 2]])
+    // } else {
+    //   setTargets([playerList[playerIndex === 0 ? playerList.length - 1 : playerIndex - 1], playerList[playerIndex === playerList.length - 1 ? 0 : playerIndex + 1]])
+    // }
+  }
+  
+  const handleGuess = () => {
+    console.log(amountSelected)
+    console.log(diceSelected)
+  }
+
 
   return <>
   {/* BOARD */}
@@ -198,15 +219,15 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
   </div>
 
   {/* MIDDLE SECTION */}
-  <div className='fixed bottom-0 left-2/4 -translate-x-2/4'>
-    <div>
+  <div className='fixed bottom-0 left-2/4 -translate-x-2/4' >
+    <button className='relative left-1/2 -translate-x-2/4' disabled={(amountSelected !== 0 && diceSelected !== 0 && curTurn?.id === socket.id) ? false : true} onClick={handleGuess}>
       <TimerButton 
         duration={20}
-        turn={curTurn ? curTurn : false}
+        turn={curTurn?.id === socket.id ? true : false}
       />
-      {(amountSelected !== 0 && diceSelected !== 0) ? 
-        <div className='absolute top-4 left-24 flex ml-8 mt-1'>
-          <h2 className='text-4xl -ml-8'>GUESS:</h2>
+      {(amountSelected !== 0 && diceSelected !== 0 && curTurn?.id === socket.id) ? 
+        <div className='absolute left-1/2 -translate-x-2/4 top-4 flex mt-1'>
+          <h2 className='text-4xl'>GUESS:</h2>
           <h2 className='text-4xl ml-4 mr-2'>{amountSelected}</h2>
             <Die 
               face = {diceSelected}
@@ -217,22 +238,37 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
           {/* </div> */}
         </div>
         :
-        <h2 className='absolute top-4 left-36 ml-2 mt-1 mx-auto text-4xl'>GUESS</h2>
+        <h2 className='absolute top-4 left-1/2 -translate-x-2/4 mt-1 w-52 text-center text-4xl'>{curTurn?.id === socket.id ? "GUESS" : "STAND BY"}</h2>
       }
-    </div>
+    </button>
     <div className='flex mx-auto w-min mt-10'>
-      <h2 className='text-4xl text-white mt-6'>TARGET:</h2>
-      <button className='text-red text-3xl ml-3 -mt-3 font-bold'>{"<"}</button>
-      <div className='flex flex-col '>
-        <div className='relative mx-auto'>
+      {curTurn?.id === socket.id ? 
+      <>
+        <h2 className='text-4xl text-white mt-6'>TARGET:</h2>
+        <button className='text-red text-3xl ml-3 -mt-3 font-bold'>{"<"}</button>
+        <div className='relative flex flex-col w-max text-center'>
           <PlayerIcons 
-            icon = {'/crew6.png'}
+            icon = {'/crew1.png'}
             size = {70}
+            styles='relative mx-auto'
           />
+          <h2 className='whitespace-nowrap'>TARGET NAME</h2>
         </div>
-        <h2 className='whitespace-nowrap'>TARGET NAME</h2>
-      </div>
-      <button className='text-red text-3xl mr-3 -mt-3 font-bold'>{">"}</button>
+        <button className='text-red text-3xl mr-3 -mt-3 font-bold'>{">"}</button>
+      </>
+      :
+      <>
+        <h2 className='text-3xl text-white mt-6 -ml-12 whitespace-nowrap'>WAITING FOR:</h2>
+        <div className='relative flex flex-col w-max text-center ml-5 mr-6'>
+          <PlayerIcons 
+            icon = {curTurn?.icon != undefined ? curTurn?.icon : "/crew1.png"}
+            size = {70}
+            styles='relative mx-auto'
+          />
+          <h2 className='whitespace-nowrap'>{curTurn ? curTurn.name : "TARGET NAME"}</h2>
+        </div>
+      </>
+      }
     </div>
     <div className='mx-auto bg-red flex w-min rounded-lg p-1 -mb-1 mt-6'>
       {amountOptions}

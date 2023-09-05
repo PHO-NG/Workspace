@@ -51,3 +51,7 @@ input[type="checkbox"] {
 input[type="checkbox"]:checked {
   accent-color: #54000E;
 }
+
+h1,h2 {
+  caret-color: transparent;
+}

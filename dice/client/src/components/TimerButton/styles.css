@@ -45,18 +45,18 @@
 }
 
 @keyframes right1 {
-    0% {height: 70px }
-    100% { height: 0px;}
+    0% {height: 70px}
+    100% { height: 0px }
 }
 
 @keyframes bottom1 {
     0% {width: 246px }
-    100% { width: 0px;}
+    100% { width: 0px }
 }
 
 @keyframes left1 {
     0% {height: 70px }
-    100% { height: 0px;}
+    100% { height: 0px }
 }
 
 @keyframes top1 {
