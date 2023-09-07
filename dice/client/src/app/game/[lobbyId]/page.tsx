@@ -33,6 +33,7 @@ const Page: FC = () => {
   const [diceSelected, setDiceSelected] = useState<number>(0)
   const [amountSelected, setAmountSelected] = useState<number>(0)
   const [turnHistory, setTurnHistory] = useState<TurnHistory[]>([])
+  const [clockwise, setClockwise] = useState<boolean>(true)
 
   /* ---- GET RID OF RERENDERING BUG ---- */
   const [text, setText] = useState({
@@ -97,7 +98,6 @@ const Page: FC = () => {
     })
 
     socket.on('finalise-player', (userData) => {
-
       let tempList = [...playerList] as PlayerStatus[]
       const index = tempList.findIndex(player => player.id === userData.id)
       if (index !== -1) {
@@ -148,6 +148,38 @@ const Page: FC = () => {
       const index = tempList.findIndex(player => player.id === userId)
       tempList[index] = {...tempList[index], dice: dice}
       setPlayerList(tempList)
+    })
+
+    socket.on('player-turn', (guess) => {
+      const playerIndex = playerList.findIndex(player => player.id === guess.player.id)
+      const targetIndex = playerList.findIndex(player => player.id === guess.target.id)
+      
+      let tempList = [...playerList] as PlayerGameState[]
+      if (targetIndex !== -1 && playerIndex != -1) {
+        tempList[playerIndex] = {...tempList[playerIndex], turn: false}
+        tempList[targetIndex] = {...tempList[targetIndex], turn: true}
+      }
+
+      if ((playerIndex - targetIndex === -1 || playerIndex - targetIndex === playerList.length - 1) && (turnHistory.length == 0)) {
+        setClockwise(true)
+      } else {
+        setClockwise(false)
+      }
+
+      let tempHistory = [...turnHistory]
+      if (tempHistory.length >= 4) {
+        tempHistory.shift()
+      }
+      
+      tempHistory.push(guess)
+      setTurnHistory(tempHistory)
+      setPlayerList(tempList)
+
+      setDiceSelected(0)
+      setAmountSelected(0)
+      
+      let amount = guess.amountCalled + (guess.diceNumber === 6 && 1)
+      setAmountSelection([amount, amount + 1, amount + 2])
     })
 
     /* ---- DISCONNECT FUNCTIONALITY ---- */
@@ -210,6 +242,7 @@ const Page: FC = () => {
           setDiceSelected = {setDiceSelected}
           amountSelection = {amountSelection}
           setAmountSelected = {setAmountSelected}
+          clockwise = {clockwise}
         />
       </Suspense>
     }

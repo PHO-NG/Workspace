@@ -92,6 +92,10 @@ io.on('connection', (socket) => {
     socket.on('player-rolls', (userId, dice) => {
         io.to(currentRoomId).emit('show-player-rerolls', userId, dice)
     })
+
+    socket.on('guess', (guess) => {
+        io.to(currentRoomId).emit('player-turn', guess)
+    })
     
     socket.on('disconnect', () => {
         socket.removeAllListeners();   

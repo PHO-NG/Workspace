@@ -36,7 +36,7 @@ const Dice: FC<DiceProps> = ({dice, reveal, size}) => {
   }
 
   return <>
-    <div className='relative' style={styles}>
+    <div className='relative -mb-24' style={styles}>
       {diceSet}
     </div>
   </>
