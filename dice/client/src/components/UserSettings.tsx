@@ -1,9 +1,11 @@
-/* eslint-disable react/no-unescaped-entities */
-import React from 'react'
+import { FC } from 'react'
 
-export default function PlayerIcons() {
-
-  return (
-    
-  )
+interface UserSettingsProps {
+  
 }
+
+const UserSettings: FC<UserSettingsProps> = ({}) => {
+  return <div></div>
+}
+
+export default UserSettings
