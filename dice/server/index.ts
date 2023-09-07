@@ -1,15 +1,14 @@
 const express = require('express')
 const http = require('http')
+import { Server } from 'socket.io'
+
 const app = express()
 const server = http.createServer(app)
 const PORT = process.env.PORT || 3001
-import { Server } from 'socket.io'
 
-const io = new Server(server, {
-    cors: {
-        origin: '*', //'https://localhost:3000'
-    }
-})
+
+const io = new Server(server)
+
 type Player = {
     id: string
     name: string
