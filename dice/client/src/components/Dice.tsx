@@ -5,9 +5,10 @@ interface DiceProps {
   dice: number[]
   reveal: boolean
   size: number
+  highlight?: number[]
 }
 
-const Dice: FC<DiceProps> = ({dice, reveal, size}) => {
+const Dice: FC<DiceProps> = ({dice, reveal, size, highlight}) => {
   
   const diceSet = dice.map((die, index) => {
     const angle = (360 / dice.length) *  Math.PI/180 * index
@@ -21,10 +22,11 @@ const Dice: FC<DiceProps> = ({dice, reveal, size}) => {
     return (
       <Die 
         face = {die}
-        size = {size}
+        size = {highlight?.includes(die) && reveal === true ? size + 5 : size}
         rotation = {index} 
         reveal = {reveal}
         customStyle = {styles}
+        diceStyle = {highlight?.includes(die) && reveal === true ? {filter: "drop-shadow(3px 3px 4px rgba(250, 255, 0, 0.33))", boxShadow: "2px 2px 4px 0px rgba(250, 255, 0, 0.34) inset"} : {}}
         key = {index}
       />
     ) 
@@ -36,7 +38,7 @@ const Dice: FC<DiceProps> = ({dice, reveal, size}) => {
   }
 
   return <>
-    <div className='relative -mb-24' style={styles}>
+    <div className='relative' style={styles}>
       {diceSet}
     </div>
   </>

@@ -132,6 +132,7 @@ const Page: FC = () => {
 
     socket.on('move-to-game-state', (list : PlayerGameState[]) => {
       setPlayerList(list)
+      setAmountSelection([list.length, list.length + 1, list.length + 2])
       setStartGame(true)
     })
 
@@ -160,10 +161,12 @@ const Page: FC = () => {
         tempList[targetIndex] = {...tempList[targetIndex], turn: true}
       }
 
-      if ((playerIndex - targetIndex === -1 || playerIndex - targetIndex === playerList.length - 1) && (turnHistory.length == 0)) {
-        setClockwise(true)
-      } else {
-        setClockwise(false)
+      if (turnHistory.length == 0) {
+        if (playerIndex - targetIndex === -1 || playerIndex - targetIndex === playerList.length - 1) {
+          setClockwise(true)
+        } else {
+          setClockwise(false)
+        }
       }
 
       let tempHistory = [...turnHistory]

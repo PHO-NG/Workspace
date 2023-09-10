@@ -66,7 +66,7 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
       left: playerXPos,  
       top: playerYPos
     }
-    const diceXPos = 235 + ((Math.sin(angle)) * 250)
+    const diceXPos = 235 + ((Math.sin(angle)) * 220)
     const diceYPos = (index == 0 ? 130 : 110) - (Math.cos(angle) * 115) + variance
     const diceStyles = {
       left: diceXPos,  
@@ -90,11 +90,12 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
         </div>
         
         <div className='absolute' style={diceStyles}>
-            <Dice
-              dice = {player.dice}
-              reveal = {player.reveal}
-              size = {20}
-            />
+          <Dice
+            dice = {player.dice}
+            reveal = {player.reveal}
+            size = {20}
+            highlight = {[1, turnHistory[turnHistory.length - 1]?.diceNumber]}
+          />
         </div>
       </Suspense>
     </div> 
@@ -224,10 +225,6 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
   }
     
   const handleGuess = () => {
-    
-
-    
-    
     if (curTurn !== undefined && curTurnTarget !== undefined) {
       const guess : TurnHistory = {
         player: curTurn,
@@ -246,9 +243,14 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
       prevAmount = turnHistory[turnHistory.length -1].amountCalled
       prevDie = turnHistory[turnHistory.length -1].diceNumber
     } 
-
-    if (diceSelected === prevDie && amountSelected <= prevAmount) {
-      return false
+    if (amountSelected !== 0 && diceSelected !== 0 && curTurn?.id === socket.id) {
+      if (prevDie === diceSelected && amountSelected <= prevAmount) {
+        return true
+      } else if (amountSelected === prevAmount && diceSelected <= prevDie) {
+        return true
+      } else {
+        return false
+      }
     } else {
       return true
     }
@@ -265,8 +267,9 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
 
   {/* MIDDLE SECTION */}
   <div className='fixed bottom-0 left-2/4 -translate-x-2/4' >
-    <button className='relative left-2/4 -translate-x-2/4 disabled:cursor-no-drop' disabled={(amountSelected !== 0 && diceSelected !== 0 && curTurn?.id === socket.id && guessCheck()) ? false : true} onClick={handleGuess}>
+    <button className='relative left-2/4 -translate-x-2/4 disabled:cursor-no-drop' disabled={guessCheck()} onClick={handleGuess}>
       <TimerButton 
+        key={turnHistory.length}
         duration={20}
         turn={curTurn?.id === socket.id ? true : false}
       />
@@ -324,30 +327,25 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
   </div>
 
   {/* RIGHT SECTION */}
-  <div className='fixed bottom-1/4 translate-y-2/4 left-3/4 w-min h-min -translate-x-2/4'>
-    <div className=''>
-      <Dice
-        dice = {dice.dice}
-        reveal = {true}
-        size = {80}
+  <div className='fixed bottom-0 left-3/4 -translate-x-2/4'>
+    <Dice
+      dice = {dice.dice}
+      reveal = {true}
+      size = {80}
+    />
+
+    <button className='absolute top-1/4 -translate-y-1/4 left-1/2 -translate-x-2/4 disabled:brightness-[500%] disabled:grayscale' onClick={handleRoll} disabled={turnHistory.length !== 0}> 
+      <Image 
+        src={'/reroll.png'}
+        className={""}
+        width={90}
+        height={0}
+        alt={'reroll'}
+        priority={true}
+        placeholder={"blur"}
+        blurDataURL={'/reroll.png'}
       />
-    </div>
-    
-    {
-    show === false && turnHistory.length === 0 && 
-      <button className='absolute top-1/2 -translate-y-3/4 left-1/2 -translate-x-2/4' onClick={handleRoll}> 
-        <Image 
-          src={'/reroll.png'}
-          className={''}
-          width={90}
-          height={0}
-          alt={'reroll'}
-          priority={true}
-          placeholder={"blur"}
-          blurDataURL={'/reroll.png'}
-        />
-      </button>
-    }
+    </button>
   </div>
   
 
