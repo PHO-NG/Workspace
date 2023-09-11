@@ -34,6 +34,7 @@ const Page: FC = () => {
   const [amountSelected, setAmountSelected] = useState<number>(0)
   const [turnHistory, setTurnHistory] = useState<TurnHistory[]>([])
   const [clockwise, setClockwise] = useState<boolean>(true)
+  const [restartCounter, setRestartCounter] = useState<number>(0)
 
   /* ---- GET RID OF RERENDERING BUG ---- */
   const [text, setText] = useState({
@@ -112,10 +113,7 @@ const Page: FC = () => {
       if (index !== -1) {
         if (index == 0) { //host
           let tempList : PlayerGameState[]
-          tempList = playerList.map((player, index) => ({
-            id: player.id,
-            name: player.name,
-            icon: player.icon,
+          tempList = playerList.map((player, index) => ({...player,
             dice: Array.from({length: 5}, () => Math.floor(Math.random() * 6) + 1),
             turn: index === 0 ? true: false,
             reveal: false,
@@ -185,6 +183,22 @@ const Page: FC = () => {
       setAmountSelection([amount, amount + 1, amount + 2])
     })
 
+    socket.on('restart-from-server', (startingIndex) => {
+      console.log("RESTART")
+      let tempList = playerList.map((player, index) => ({...player,
+        dice: Array.from({length: 5}, () => Math.floor(Math.random() * 6) + 1),
+        turn: index === startingIndex ? true: false,
+        reveal: false
+      }))
+      setPlayerList(tempList)
+      setAmountSelection([tempList.length, tempList.length + 1, tempList.length + 2])
+      setDiceSelected(0)
+      setAmountSelected(0)
+      setTurnHistory([])
+      setClockwise(true)
+      setRestartCounter(prev => prev + 1)
+    })
+
     /* ---- DISCONNECT FUNCTIONALITY ---- */
     socket.on('disconnect-all', () => {
       alert("Host Disconnected")
@@ -237,6 +251,7 @@ const Page: FC = () => {
       :
       <Suspense fallback={<Loading />}>
         <Game
+          key = {restartCounter}
           socket = {socket}
           playerList = {playerList as PlayerGameState[]}
           amountSelected = {amountSelected}

@@ -30,7 +30,7 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
   const [show, setShow] = useState<boolean>(false)
   const [curTurn, setCurTurn] = useState<Player>()
   const [curTurnTarget, setCurTurnTarget] = useState<Player>()
-  const [rerolled, setRerolled] = useState<boolean>(false)
+  const [caller, setCaller] = useState<string>()
   const [dice, setDice] = useState<PlayerDice>({
     dice: [0,0,0,0,0],
     reveal: false
@@ -40,7 +40,6 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
   const [timer, setTimer] = useState<number>(0)
 
   const dieArr = [1,2,3,4,5,6]
-  
 
   useEffect(() => {
     const playerIndex = playerList.findIndex(player => player.id === socket.id)
@@ -54,6 +53,7 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
       calculatePosition(player, index)
     ))
     setBoardMap(boardMap)
+    console.log(playerList)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playerList])
 
@@ -81,12 +81,7 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
                 icon={player.icon}
                 size={50}
             />
-            {/* {rerolled == true && <div>
-              <div className='absolute -left-10 top-0 w-32 h-5/6 border-x-4  border-red rounded-full'></div>
-              <div className='absolute -left-113 top-0 w-40 h-5/6 border-x-6  border-red rounded-full'></div>
-            </div>} */}
           </div>
-          
         </div>
         
         <div className='absolute' style={diceStyles}>
@@ -163,34 +158,26 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
       </button>
   ))
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (rerolled) {
-        setRerolled(false)
-      }}, 1000)
-    return () => clearTimeout(timeout)
-  }, [rerolled])
-
   const handleRoll = () => {
     const tempDice : number[] = Array.from({length: 5}, () => Math.floor(Math.random() * 6) + 1)
     setDice(prev => ({...prev,
     dice: tempDice}))
     socket.emit('player-rolls', socket.id, tempDice)
-    setRerolled(true)
   }
 
   const handleReveal = () => {
     if (show == false) {
-      socket.emit('show-called')
+      socket.emit('show-called' , socket.id)
     } else {
       socket.emit('reveal-hand', socket.id)
     }
   }
 
   useEffect(() => {
-    socket.on('set-show-true', () => {
+    socket.on('set-show-true', (userId) => {
+      setCaller(userId)
       setShow(true)
-    })
+    })  
 
     return(() => {
       socket.off('set-show-true')
@@ -256,6 +243,20 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
     }
   }
 
+  const handleRestart = () => {
+    let amountCounter = 0
+    const dieCheck = turnHistory[turnHistory.length - 1].diceNumber
+    playerList.forEach(player => player.dice.forEach(die => die === (dieCheck || 1) && amountCounter++))
+
+    let loserIndex;
+    if (amountCounter >= turnHistory[turnHistory.length - 1].amountCalled) {
+      loserIndex = playerList.findIndex(player => player.id === caller)
+    } else {
+      loserIndex = playerList.findIndex(player => player.id === turnHistory[turnHistory.length - 1].player.id)
+    }
+    socket.emit('restart', loserIndex)
+  }
+
   return <>
   {/* BOARD */}
   <div className='relative w-[600px] h-[321px] border-[12px] rounded-[150px] border-red mx-auto mt-24'>
@@ -263,6 +264,10 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
     {(turnHistory.length > 0 && playerList[playerList.findIndex(player => player.id === socket.id)].reveal !== true)
     && (turnHistory[turnHistory.length - 1].player.id !== socket.id || show === true)
     && <button onClick={handleReveal} className='absolute left-2/4 -translate-x-2/4 bottom-2/4 translate-y-2/4 text-4xl border-red bg-red font-bold text-black tracking-wider select-none border-8 rounded-xl w-64 m-auto p-2'>{show ? "SHOW" : "CALL"}</button>}
+    
+    {playerList.findIndex(player => player.reveal !== true) === -1 && playerList.findIndex(player => player.id === socket.id) === 0 && show === true
+    && <button onClick={handleRestart} className='absolute left-2/4 -translate-x-2/4 bottom-2/4 translate-y-2/4 text-4xl border-red bg-red font-bold text-black tracking-wider select-none border-8 rounded-xl w-64 m-auto p-2'>RESTART</button>}
+
   </div>
 
   {/* MIDDLE SECTION */}

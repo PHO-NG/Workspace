@@ -82,8 +82,8 @@ io.on('connection', (socket) => {
         io.to(currentRoomId).emit('move-to-game-state', playerList)
     })
 
-    socket.on('show-called', () => {
-        io.to(currentRoomId).emit('set-show-true')
+    socket.on('show-called', (userId) => {
+        io.to(currentRoomId).emit('set-show-true', userId)
     })
 
     socket.on('reveal-hand', (userId) => {
@@ -96,6 +96,10 @@ io.on('connection', (socket) => {
 
     socket.on('guess', (guess) => {
         io.to(currentRoomId).emit('player-turn', guess)
+    })
+
+    socket.on('restart', (index) => {
+        io.to(currentRoomId).emit('restart-from-server', index)
     })
     
     socket.on('disconnect', () => {
