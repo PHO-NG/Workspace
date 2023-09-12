@@ -11,28 +11,11 @@ const io = new Server(server, {
     }
 })
 
-type Player = {
-    id: string
-    name: string
-    icon: string
-}
-
-type Lobby = {
-    lobbyId: string
-    lobbyName: string
-    initialAmount: number
-    openInvite: boolean
-    spectator: boolean
-    reroll: boolean
-    host : Player
-}
-
-
-let lobbyData : Lobby[] = []; //list of lobbies with no host initialised
+let lobbyData = []
 
 io.on('connection', (socket) => {
-    let currentRoomId : string
-    let currentHostId : string
+    let currentRoomId
+    let currentHostId
     console.log("user connected: " + socket.id)
     socket.emit('get-userId', (socket.id))
     /* ---- LOBBY SETTINGS ---- */
