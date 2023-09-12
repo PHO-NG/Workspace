@@ -1,15 +1,16 @@
 const express = require('express')
 const http = require('http')
 const app = express()
+const socketio = require('socket.io')
+
+const router = require('./router');
+
 const server = http.createServer(app)
 const PORT = process.env.PORT || 3001
-import { Server } from 'socket.io'
+const io = socketio(server)
 
-const io = new Server(server, {
-    cors: {
-        origin: 'liars-dice-pho-ng.vercel.app' || `http://localhost.com:3000/`
-    }
-})
+app.use(cors());
+app.use(router);
 
 let lobbyData = []
 
