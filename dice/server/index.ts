@@ -1,15 +1,17 @@
 const express = require('express')
 const http = require('http')
+const socketio = require('socketio')
+const cors = require('cors')
+const router = require('./router')
+
+const PORT = process.env.PORT || 3001
+
 const app = express()
 const server = http.createServer(app)
-const PORT = process.env.PORT || 3001
-import { Server } from 'socket.io'
+const io = socketio(server)
 
-const io = new Server(server, {
-    cors: {
-        origin: 'liars-dice-pho-ng.vercel.app' || `http://localhost.com:3000/`
-    }
-})
+app.use(cors())
+app.use(router)
 
 type Player = {
     id: string
@@ -118,8 +120,7 @@ io.on('connection', (socket) => {
         
     })
   })
-  
+
 server.listen(PORT, () => {
     console.log(`✔️ Server listening on port ${PORT}`)
 })
-
