@@ -2,12 +2,11 @@
     "name": "server",
     "version": "1.0.0",
     "description": "",
-    "main": "index.js",
+    "main": "index.ts",
     "scripts": {
+        "start": "node index.js",
         "build": "tsc",
-        "postinstall": "npm run tsc",
-        "start": "node .",
-        "start:dev": "ts-node index.ts"
+        "postinstall": "npm run build"
     },
     "keywords": [],
     "author": "",
