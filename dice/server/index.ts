@@ -1,17 +1,32 @@
 const express = require('express')
 const http = require('http')
-const socketio = require('socketio')
-const cors = require('cors')
-const router = require('./router')
-
-const PORT = process.env.PORT || 3001
-
 const app = express()
 const server = http.createServer(app)
-const io = socketio(server)
+const PORT = process.env.PORT || 3001
+import { Server } from 'socket.io'
 
-app.use(cors())
-app.use(router)
+const io = new Server(server, {
+    cors: {
+        origin: 'liars-dice-pho-ng.vercel.app' || `http://localhost.com:3000/`
+    }
+})
+
+type Player = {
+    id: string
+    name: string
+    icon: string
+}
+
+type Lobby = {
+    lobbyId: string
+    lobbyName: string
+    initialAmount: number
+    openInvite: boolean
+    spectator: boolean
+    reroll: boolean
+    host : Player
+}
+
 
 let lobbyData : Lobby[] = []; //list of lobbies with no host initialised
 

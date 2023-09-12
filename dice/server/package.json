@@ -6,7 +6,8 @@
     "scripts": {
         "start": "node index.js",
         "build": "tsc",
-        "postinstall": "npm run build"
+        "postinstall": "npm run build",
+        "server": "nodemon index.ts"
     },
     "keywords": [],
     "author": "",
