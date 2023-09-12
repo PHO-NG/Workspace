@@ -6,11 +6,8 @@ import { io } from 'socket.io-client'
 import CreateLobby from '@/components/CreateLobby';
 import Title from '@/components/Title/Title';
 import './globals.css'
-import TimerButton from '@/components/TimerButton/TimerButton';
 
-
-
-const socket = io('http://localhost:3001' || 'https://liars-dice-express-d026f352885a.herokuapp.com/', {
+const socket = io('https://liars-dice-express-d026f352885a.herokuapp.com/', {
   transports: ["websocket", "polling"]
 })
 
