@@ -23,7 +23,7 @@ interface LobbyProps {
 
 const Lobby: FC<LobbyProps> = ({playerList, lobbySettings, socket, text}) => {
     const [lobbyMap, setLobbyMap] = useState<JSX.Element[]>()
-    const url = "http://localhost:3000" + usePathname()
+    const url = "https://liars-dice-pho-ng.vercel.app" + usePathname()
     const [copied, setCopied] = useState<boolean>(false)
 
     useEffect(() => {
