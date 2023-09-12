@@ -11,6 +11,9 @@ import Loading from './loading'
 const socket = io('https://liars-dice-express-d026f352885a.herokuapp.com/', {
   transports: ["websocket", "polling"],
 })
+// const socket = io('http://localhost:3001/', {
+//   transports: ["websocket", "polling"],
+// })
 
 const Page: FC = () => {
   const lobbyId = usePathname().split('/')[2]
@@ -36,20 +39,12 @@ const Page: FC = () => {
   const [clockwise, setClockwise] = useState<boolean>(true)
   const [restartCounter, setRestartCounter] = useState<number>(0)
 
-  /* ---- GET RID OF RERENDERING BUG ---- */
-  const [text, setText] = useState({
-    button: "",
-    reroll: "",
-    initialAmount: ""
-  })
-
   /* ---- INITILISE LOBBY ---- */
   useEffect(() => {
     socket.emit('find-lobby-on-server', lobbyId)
     socket.on('initilise-lobby', (lobbyData, host) => {
       if (lobbySettings.lobbyName === "") {
         setLobbySettings(lobbyData)
-        setText(prev => ({...prev, button: host ? "START GAME" : "READY"}))
         if (host) {
           let tempList = [...playerList] as PlayerStatus[]
           tempList.push({...lobbyData.host, id: socket.id, ready: false, filled: true, loaded: true})
@@ -58,13 +53,6 @@ const Page: FC = () => {
         }
       }
     })
-
-    if (lobbySettings != undefined) {
-      setText(prev => ({...prev, 
-        reroll: lobbySettings.reroll == true ? "ON" : "OFF", 
-        initialAmount: lobbySettings.initialAmount == 1 ? "Dynamic": lobbySettings.initialAmount.toString()
-      }))
-    }
 
     return () => {
       socket.off('initilise-lobby')
@@ -244,7 +232,6 @@ const Page: FC = () => {
           playerList = {playerList as PlayerStatus[]}
           lobbySettings = {lobbySettings}
           socket = {socket}
-          text = {text}
         />
       </div>
       </Suspense>

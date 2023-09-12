@@ -10,6 +10,9 @@ import './globals.css'
 const socket = io('https://liars-dice-express-d026f352885a.herokuapp.com/', {
   transports: ["websocket", "polling"]
 })
+// const socket = io('http://localhost:3001/', {
+//   transports: ["websocket", "polling"]
+// })
 
 export default function Home() {
   const [initiate, setInitiate] = React.useState(false)
@@ -22,7 +25,6 @@ export default function Home() {
       socket.off("get-userId")
     )
   })
-
  
   return (
     <main>
@@ -32,10 +34,7 @@ export default function Home() {
         {
           initiate === false
           ?
-          <div className='flex flex-col justify-center items-center'>
-            <Link href="/self-play" className="bg-gray hover:bg-darkgray text-4xl py-3 px-20 rounded-lg m-16">Self Play</Link>
-            <button className="bg-gray hover:bg-darkgray text-4xl py-3 px-16 rounded-lg" onClick={() => setInitiate(true)}>Online Play</button>
-          </div>
+          <button className="absolute left-2/4 -translate-x-2/4 top-1/2 bg-gray hover:bg-darkgray text-4xl py-3 px-16 rounded-lg" onClick={() => setInitiate(true)}>Online Play</button>
           :
           <>
             <button className="absolute top-3 left-3" onClick={() => setInitiate(false)}>BACK</button>

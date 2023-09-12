@@ -9,62 +9,71 @@ import { Tooltip as ReactTooltip } from "react-tooltip"
 import Title from '@/components/Title/Title'
 import LobbyCard from '@/components/LobbyCard'
 
-
 interface LobbyProps {
   playerList: PlayerStatus[]
   lobbySettings: Lobby
   socket: Socket
-  text: {
-    button: string,
-    reroll: string,
-    initialAmount: string
-  }
 }
 
-const Lobby: FC<LobbyProps> = ({playerList, lobbySettings, socket, text}) => {
+const Lobby: FC<LobbyProps> = ({playerList, lobbySettings, socket}) => {
     const [lobbyMap, setLobbyMap] = useState<JSX.Element[]>()
     const url = "https://liars-dice-pho-ng.vercel.app" + usePathname()
+    // const url = "http://localhost:3000" + usePathname()
     const [copied, setCopied] = useState<boolean>(false)
+    const [displayText, setDisplayText] = useState({
+      button: "",
+      reroll: "",
+      initialAmount: ""
+    })
 
     useEffect(() => {
-        if (playerList != undefined) {
-          let tempList = playerList;
-          tempList = [ ...tempList, ...Array(Math.max(6 - tempList.length)).fill({
-            id: "",
-            name: "",
-            icon: "",
-            ready: false,
-            host: false,
-            filled: false,
-            loaded: false
-          })];
-          setLobbyMap(tempList.map((player, index) => (
-            <LobbyCard 
-              {...player}
-              key={index}
-              index={index}
-            />
-          )))
+      if (playerList != undefined && lobbySettings != undefined) {
+        const index = playerList.findIndex(player => player.id === socket.id)
+        if (index !== -1) {
+          setDisplayText({
+            button: index === 0 ? "START GAME" : (playerList[index].ready ? "NOT READY" : "READY"),
+            reroll: lobbySettings.reroll == true ? "ON" : "OFF", 
+            initialAmount: lobbySettings.initialAmount == 1 ? "Dynamic": lobbySettings.initialAmount.toString()
+          })
         }
-      }, [playerList])
-
-      useEffect(() => {
-        const timeout = setTimeout(() => {
-          if (copied) {
-            setCopied(false)
-          }}, 1000)
-        return () => clearTimeout(timeout)
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, [copied])
-
-      const handleClick = () => {
-        socket.emit('player-ready', socket.id)
+        let tempList = playerList;
+        tempList = [ ...tempList, ...Array(Math.max(6 - tempList.length)).fill({
+          id: "",
+          name: "",
+          icon: "",
+          ready: false,
+          host: false,
+          filled: false,
+          loaded: false
+        })];
+        setLobbyMap(tempList.map((player, index) => (
+          <LobbyCard 
+            {...player}
+            key={index}
+            index={index}
+          />
+        )))
       }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [playerList, lobbySettings])
 
-      const handleCopy = () => {
-        navigator.clipboard.writeText(url)
-        setCopied(true)
-      }
+    useEffect(() => {
+      const timeout = setTimeout(() => {
+        if (copied) {
+          setCopied(false)
+        }}, 1000)
+      return () => clearTimeout(timeout)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [copied])
+
+    const handleClick = () => {
+      socket.emit('player-ready', socket.id)
+    }
+
+    const handleCopy = () => {
+      navigator.clipboard.writeText(url)
+      setCopied(true)
+    }
 
     return <>
     <div>
@@ -74,22 +83,13 @@ const Lobby: FC<LobbyProps> = ({playerList, lobbySettings, socket, text}) => {
         <div className='flex flex-col w-5/12'>
           {lobbyMap}
           <div className='flex justify-between w-10/12 mx-auto'>
-            {lobbySettings?.spectator == true &&
-            <div className='flex text-4xl w-64 m-auto p-3 bg-[#161616]'>
-              <h2 className='text-4xl'>SPECTATE</h2>
-              <div className='border-red border-4 rounded-full w-10 h-10 mx-auto'>
-                <h2 className='text-2xl text-center font-bold'>2</h2>
-              </div>
-            </div>
-            }
-            <button onClick={handleClick} className='text-4xl border-red border-8 rounded-xl w-64 m-auto p-2'>{text.button ? text.button : "READY"}</button>
+            <button onClick={handleClick} className='text-4xl border-red border-8 rounded-xl w-64 m-auto p-2'>{displayText.button}</button>
           </div>
         </div>
 
         <div className='relative w-5/12 h-[420px]'>
           <h2 className='text-4xl'>ROOM NAME: {lobbySettings?.lobbyName !== undefined ? lobbySettings.lobbyName : ""}</h2>
-          <h2 className='text-4xl my-3'>INITIAL AMOUNT: {text.initialAmount}</h2>
-          <h2 className='text-4xl'>RE-ROLL DICE: {text.reroll} </h2>
+          <h2 className='text-4xl my-3'>INITIAL AMOUNT: {displayText.initialAmount}</h2>
           <div className='absolute bottom-0 w-full'>
             <h2 className='text-xl ml-2'>Share lobby link</h2>
             <div className='relative bg-[#2323237e] py-1 px-2 w-10/12 flex'>
