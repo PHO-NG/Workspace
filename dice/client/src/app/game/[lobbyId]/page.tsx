@@ -8,7 +8,7 @@ import NewPlayer from '@/components/NewPlayer'
 import Lobby from '@/components/Lobby'
 import Game from '@/components/Game'
 import Loading from './loading'
-const socket = io('http://localhost:3001', {
+const socket = io('http://localhost:3001' || 'https://liars-dice-express-d026f352885a.herokuapp.com/', {
   transports: ["websocket", "polling"],
 })
 

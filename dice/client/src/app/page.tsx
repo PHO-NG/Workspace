@@ -10,7 +10,7 @@ import TimerButton from '@/components/TimerButton/TimerButton';
 
 
 
-const socket = io('http://localhost:3001', {
+const socket = io('http://localhost:3001' || 'https://liars-dice-express-d026f352885a.herokuapp.com/', {
   transports: ["websocket", "polling"]
 })
 
