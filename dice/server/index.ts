@@ -13,7 +13,23 @@ const io = socketio(server)
 app.use(cors())
 app.use(router)
 
-let lobbyData : Lobby[] = []; //list of lobbies with no host initialised
+type Player = {
+    id: string
+    name: string
+    icon: string
+}
+
+type Lobby = {
+    lobbyId: string
+    lobbyName: string
+    initialAmount: number
+    openInvite: boolean
+    spectator: boolean
+    reroll: boolean
+    host : Player
+}
+
+const lobbyData : Lobby[] = []; //list of lobbies with no host initialised
 
 io.on('connection', (socket) => {
     let currentRoomId : string
