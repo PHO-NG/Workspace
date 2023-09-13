@@ -114,7 +114,7 @@ const CreateLobby: FC<PageProps> = ({ gameId, socket }) => {
           <input type="checkbox" onClick={handleChange} id="openLobby" name="openLobby" />
         </div>
         
-        <button className='text-3xl border-red border-8 rounded-lg w-64 m-auto py-3' type="submit">CREATE LOBBY</button>
+        <button className='text-3xl border-red border-8 rounded-lg w-64 m-auto py-3 opacity-80 hover:opacity-100' type="submit">CREATE LOBBY</button>
       </form>
     </div>
   )

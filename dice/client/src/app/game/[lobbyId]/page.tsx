@@ -30,6 +30,7 @@ const Page: FC = () => {
   /* ---- LOBBY STATES ---- */
   const [newPlayerLoaded, setNewPlayerLoaded] = useState<boolean>(false)
   const [startGame, setStartGame] = useState<boolean>(false)
+  const [fullLobby, setFullLobby] = useState<boolean>(false)
 
   /* ---- GAME STATES ---- */
   const [amountSelection, setAmountSelection] = useState<number[]>([4,5,6])
@@ -66,20 +67,28 @@ const Page: FC = () => {
     socket.emit('add-new-player-to-playerList', socket.id)
     socket.on('get-and-update-playerList', (userId) => {
       if ((playerList.findIndex(player => player.id == userId) === -1) && playerList.length > 0) {
-        let tempList = [...playerList] as PlayerStatus[]
-        if (userId != null) {
-          tempList.push({
-            id: userId,
-            name: "",
-            icon: "",
-            ready: false,
-            filled: true,
-            loaded: false
-          })  
-        }    
-        setPlayerList(tempList)
-        socket.emit('send-playerList-to-all', tempList)
+        if (playerList.length !== 6) {
+          let tempList = [...playerList] as PlayerStatus[]
+          if (userId != null) {
+            tempList.push({
+              id: userId,
+              name: "",
+              icon: "",
+              ready: false,
+              filled: true,
+              loaded: false
+            })  
+          }    
+          setPlayerList(tempList)
+          socket.emit('send-playerList-to-all', tempList)
+        } else {
+          socket.emit('reject-player', userId)
+        }
       }
+    })
+
+    socket.on('lobby-full', () => {
+      setFullLobby(true)
     })
 
     socket.on('playerList-from-server', (list) => {
@@ -214,8 +223,10 @@ const Page: FC = () => {
     }
   }, [playerList])
    
+  console.log(fullLobby)
   return <>
-    {
+  {fullLobby !== true ?
+    (
       startGame == false ?
       <Suspense fallback={<Loading />}>
         <div>
@@ -250,7 +261,12 @@ const Page: FC = () => {
           clockwise = {clockwise}
         />
       </Suspense>
-    }
+    )
+    :
+    <>
+      <h2>lobby full sowwy</h2>
+    </>
+  }
   </>
 }
 

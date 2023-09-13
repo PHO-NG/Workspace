@@ -83,7 +83,7 @@ const Lobby: FC<LobbyProps> = ({playerList, lobbySettings, socket}) => {
         <div className='flex flex-col w-5/12'>
           {lobbyMap}
           <div className='flex justify-between w-10/12 mx-auto'>
-            <button onClick={handleClick} className='text-4xl border-red border-8 rounded-xl w-64 m-auto p-2'>{displayText.button}</button>
+            <button onClick={handleClick} className='text-4xl border-red border-8 rounded-xl w-64 m-auto p-2 opacity-80 hover:opacity-100'>{displayText.button}</button>
           </div>
         </div>
 
@@ -95,7 +95,7 @@ const Lobby: FC<LobbyProps> = ({playerList, lobbySettings, socket}) => {
             <div className='relative bg-[#2323237e] py-1 px-2 w-10/12 flex'>
               <h2 className='text-xl'>{url}</h2>
               {/* <button onClick={() => navigator.clipboard.writeText(url)}>TEST</button> */}
-              <button onClick={handleCopy} className='ml-auto'> 
+              <button onClick={handleCopy} className='ml-auto opacity-80 hover:opacity-100'> 
                 <div data-tooltip-id="copytoclipboard" className={copied ? 'ease-in-out duration-300 border-2 border-[#54000e9c] p-1 -m-1 rounded-lg' : 'duration-150 ease-out border-[#54000e9c]'}>
                   <Image 
                     src={'/copy.png'}

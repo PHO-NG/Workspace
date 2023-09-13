@@ -40,18 +40,17 @@ const NewPlayer: FC<NewPlayerProps> = ({lobbyName, lobbyId, socket, updatePlayer
                 autoComplete="off" type="text" value={userData.name} onChange={(e) => setUserData(prev => ({...prev, name: e.target.value}))} />
                 <h2 className='mx-auto text-3xl my-7'>ICON:</h2>
                 <div className='flex mx-auto'>
-                    <button className='text-red text-7xl mx-5 font-bold' onClick={() => setCounter(count => count - 1)}>{"<"}</button>
+                    <button className='text-red text-7xl mx-5 font-bold opacity-80 hover:opacity-100 h-fit my-auto' onClick={() => setCounter(count => count - 1)}>{"<"}</button>
                     <Icon 
                         icon={"/crew" + ((Math.abs(counter > 0 ? counter : 5 * counter) % 6 ) + 1) + ".png"}
                         size={200}
                     />
-                    <button className='text-red text-7xl mx-5 font-bold' onClick={() => setCounter(count => count + 1)}>{">"}</button>
+                    <button className='text-red text-7xl mx-5 font-bold opacity-80 hover:opacity-100 h-fit my-auto' onClick={() => setCounter(count => count + 1)}>{">"}</button>
                 </div>
-                <button className='text-3xl border-red border-8 rounded-lg w-64 m-auto py-3 font-bold' onClick={handleClick}>JOIN LOBBY</button>
+                <button className='text-3xl border-red border-8 rounded-lg w-64 m-auto py-3 font-bold opacity-80 hover:opacity-100' onClick={handleClick}>JOIN LOBBY</button>
             </div>
         </Suspense>
         }
-
         <div className='w-screen h-screen opacity-50 z-10 border-2 absolute left-0 top-0 flex justify-center bg-black'></div>
     </>
     

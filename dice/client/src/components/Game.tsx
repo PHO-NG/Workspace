@@ -272,7 +272,7 @@ const Game: FC<GameProps> = ({socket, playerList, turnHistory, amountSelection, 
 
   {/* MIDDLE SECTION */}
   <div className='fixed bottom-0 left-2/4 -translate-x-2/4' >
-    <button className='relative left-2/4 -translate-x-2/4 disabled:cursor-no-drop' disabled={guessCheck()} onClick={handleGuess}>
+    <button className='relative left-2/4 -translate-x-2/4 disabled:cursor-no-drop opacity-80 enabled:hover:opacity-100' disabled={guessCheck()} onClick={handleGuess}>
       <TimerButton 
         key={turnHistory.length}
         duration={20}
