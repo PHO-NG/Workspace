@@ -66,23 +66,24 @@ const Page: FC = () => {
     /* ---- LOBBY FUNCTIONALITY ---- */
     socket.emit('add-new-player-to-playerList', socket.id)
     socket.on('get-and-update-playerList', (userId) => {
-      if ((playerList.findIndex(player => player.id == userId) === -1) && playerList.length > 0 && playerList.length < 6) {
-        let tempList = [...playerList] as PlayerStatus[]
-        if (userId != null) {
-          tempList.push({
-            id: userId,
-            name: "",
-            icon: "",
-            ready: false,
-            filled: true,
-            loaded: false
-          })  
-        }    
-        setPlayerList(tempList)
-        setFullLobby(false)
-        socket.emit('send-playerList-to-all', tempList)
-      } else {
-        socket.emit('reject-player', userId)
+      if ((playerList.findIndex(player => player.id == userId) === -1) && playerList.length > 0) {
+        if (playerList.length !== 6) {
+          let tempList = [...playerList] as PlayerStatus[]
+          if (userId != null) {
+            tempList.push({
+              id: userId,
+              name: "",
+              icon: "",
+              ready: false,
+              filled: true,
+              loaded: false
+            })  
+          }    
+          setPlayerList(tempList)
+          socket.emit('send-playerList-to-all', tempList)
+        } else {
+          socket.emit('reject-player', userId)
+        }
       }
     })
 
@@ -91,7 +92,6 @@ const Page: FC = () => {
     })
 
     socket.on('playerList-from-server', (list) => {
-      setFullLobby(false)
       setPlayerList(list)
     })
 
@@ -100,7 +100,6 @@ const Page: FC = () => {
       const index = tempList.findIndex(player => player.id === userData.id)
       if (index !== -1) {
         tempList[index] = {...tempList[index], ...userData, loaded: true}
-        setPlayerList(tempList)
         socket.emit('playerList', tempList)
       }
     })
@@ -119,7 +118,6 @@ const Page: FC = () => {
         } else {
           let tempList = [...playerList] as PlayerStatus[]
           tempList[index] = {...tempList[index], ready: !tempList[index].ready}
-          setPlayerList(tempList)
           socket.emit('playerList', tempList)
         }
       }
@@ -222,8 +220,7 @@ const Page: FC = () => {
       socket.off('disconnect-all')
     }
   }, [playerList])
-   
-  console.log(fullLobby)
+
   return <>
   {fullLobby !== true ?
     (
