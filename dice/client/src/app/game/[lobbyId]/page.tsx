@@ -79,6 +79,7 @@ const Page: FC = () => {
           })  
         }    
         setPlayerList(tempList)
+        setFullLobby(false)
         socket.emit('send-playerList-to-all', tempList)
       } else {
         socket.emit('reject-player', userId)
@@ -90,6 +91,7 @@ const Page: FC = () => {
     })
 
     socket.on('playerList-from-server', (list) => {
+      setFullLobby(false)
       setPlayerList(list)
     })
 
