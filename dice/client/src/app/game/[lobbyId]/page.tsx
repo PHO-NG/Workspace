@@ -66,24 +66,22 @@ const Page: FC = () => {
     /* ---- LOBBY FUNCTIONALITY ---- */
     socket.emit('add-new-player-to-playerList', socket.id)
     socket.on('get-and-update-playerList', (userId) => {
-      if ((playerList.findIndex(player => player.id == userId) === -1) && playerList.length > 0) {
-        if (playerList.length !== 6) {
-          let tempList = [...playerList] as PlayerStatus[]
-          if (userId != null) {
-            tempList.push({
-              id: userId,
-              name: "",
-              icon: "",
-              ready: false,
-              filled: true,
-              loaded: false
-            })  
-          }    
-          setPlayerList(tempList)
-          socket.emit('send-playerList-to-all', tempList)
-        } else {
-          socket.emit('reject-player', userId)
-        }
+      if ((playerList.findIndex(player => player.id == userId) === -1) && playerList.length > 0 && playerList.length < 6) {
+        let tempList = [...playerList] as PlayerStatus[]
+        if (userId != null) {
+          tempList.push({
+            id: userId,
+            name: "",
+            icon: "",
+            ready: false,
+            filled: true,
+            loaded: false
+          })  
+        }    
+        setPlayerList(tempList)
+        socket.emit('send-playerList-to-all', tempList)
+      } else {
+        socket.emit('reject-player', userId)
       }
     })
 
