@@ -47,12 +47,16 @@ io.on('connection', (socket) => {
         socket.broadcast.to(currentRoomId).emit('get-and-update-playerList', userId)
     })
 
+    socket.on('reject-player', (userId) => {
+        io.to(userId).emit('lobby-full')
+    })
+
     socket.on('send-playerList-to-all', (list) => {
         socket.broadcast.to(currentRoomId).emit('playerList-from-server', list)
     })
 
     socket.on('playerList', (list) => {
-        socket.broadcast.to(currentRoomId).emit('playerList-from-server', list)
+        io.to(currentRoomId).emit('playerList-from-server', list)
     })
 
     socket.on('join-lobby', (userData) => {
@@ -97,7 +101,7 @@ io.on('connection', (socket) => {
                 io.in(currentRoomId).emit('disconnect-all')
                 io.in(currentRoomId).disconnectSockets();
             } else {
-                io.in(currentRoomId).emit('remove-player', socket.id)
+                io.to(currentHostId).emit('remove-player', socket.id)
             }
         }
         console.log("user disconnected: " + socket.id)
