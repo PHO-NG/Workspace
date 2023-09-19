@@ -1,6 +1,5 @@
 'use client'
 import { FC, useEffect, useState } from 'react'
-import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Socket } from 'socket.io-client'
@@ -17,8 +16,8 @@ interface LobbyProps {
 
 const Lobby: FC<LobbyProps> = ({playerList, lobbySettings, socket}) => {
     const [lobbyMap, setLobbyMap] = useState<JSX.Element[]>()
-    const url = "https://liars-dice-pho-ng.vercel.app" + usePathname()
-    // const url = "http://localhost:3000" + usePathname()
+    // const url = "https://liars-dice-pho-ng.vercel.app" + usePathname()
+    const url = "http://localhost:3000" + usePathname()
     const [copied, setCopied] = useState<boolean>(false)
     const [displayText, setDisplayText] = useState({
       button: "",
@@ -78,7 +77,6 @@ const Lobby: FC<LobbyProps> = ({playerList, lobbySettings, socket}) => {
     return <>
     <div>
       <Title />
-      <Link href="/" className='absolute left-3 top-3'>EXIT</Link>
       <div className='flex justify-evenly'>
         <div className='flex flex-col w-5/12'>
           {lobbyMap}
@@ -103,7 +101,6 @@ const Lobby: FC<LobbyProps> = ({playerList, lobbySettings, socket}) => {
                     height={20}
                     alt={'copy'}
                     priority={true}
-                    placeholder={"blur"}
                     blurDataURL={'/copy.png'}
                   />
                   <ReactTooltip

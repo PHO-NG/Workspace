@@ -27,6 +27,7 @@ io.on('connection', (socket) => {
     })
     
     socket.on('find-lobby-on-server', (lobbyId) => {
+        // console.log(lobbyData)
         socket.join(lobbyId)
         currentRoomId = lobbyId
         // Find lobbyId in array full of lobbyIds (host should always find one)

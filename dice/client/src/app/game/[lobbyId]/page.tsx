@@ -2,18 +2,18 @@
 'use client'
 import { FC, Suspense, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
-
+import Link from 'next/link'
 import { io } from 'socket.io-client'
 import NewPlayer from '@/components/NewPlayer'
 import Lobby from '@/components/Lobby'
 import Game from '@/components/Game'
 import Loading from './loading'
-const socket = io('https://liars-dice-express-d026f352885a.herokuapp.com/', {
-  transports: ["websocket", "polling"],
-})
-// const socket = io('http://localhost:3001/', {
+// const socket = io('https://liars-dice-express-d026f352885a.herokuapp.com/', {
 //   transports: ["websocket", "polling"],
 // })
+const socket = io('http://localhost:3001/', {
+  transports: ["websocket", "polling"],
+})
 
 const Page: FC = () => {
   const lobbyId = usePathname().split('/')[2]
@@ -222,6 +222,7 @@ const Page: FC = () => {
   }, [playerList])
 
   return <>
+  <Link href="/" className='absolute left-3 top-3 text-red hover:text-white text-3xl font-bold' onClick={() => socket.emit('disconnect')}>EXIT</Link>
   {fullLobby !== true ?
     (
       startGame == false ?
