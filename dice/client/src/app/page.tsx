@@ -5,12 +5,12 @@ import CreateLobby from '@/components/CreateLobby';
 import Title from '@/components/Title/Title';
 import './globals.css'
 
-// const socket = io('https://liars-dice-express-d026f352885a.herokuapp.com/', {
-//   transports: ["websocket", "polling"]
-// })
-const socket = io('http://localhost:3001/', {
+const socket = io('https://liars-dice-express-d026f352885a.herokuapp.com/', {
   transports: ["websocket", "polling"]
 })
+// const socket = io('http://localhost:3001/', {
+//   transports: ["websocket", "polling"]
+// })
 
 export default function Home() {
   const [initiate, setInitiate] = React.useState(false)
