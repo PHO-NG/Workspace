@@ -7,7 +7,7 @@
 
 A full stack web application of the popular dice game, Liar's Dice.
 
-Next.JS/Typescript/React/Socket.IO/Express
+Next.JS/Typescript/React/Socket.IO/Express/[Figma](https://www.figma.com/file/fXHQyS4QriLdrMnWnTI34h/Liar's-Dice?type=design&mode=design)
 
 **Solo project**
 
