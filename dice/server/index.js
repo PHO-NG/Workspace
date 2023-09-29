@@ -27,21 +27,22 @@ io.on('connection', (socket) => {
     })
     
     socket.on('find-lobby-on-server', (lobbyId) => {
-        // console.log(lobbyData)
         socket.join(lobbyId)
         currentRoomId = lobbyId
         // Find lobbyId in array full of lobbyIds (host should always find one)
         const lobbyIndex = lobbyData.findIndex(lobby => lobby.lobbyId === lobbyId)
         if (lobbyIndex !== -1) {
-            if (lobbyData[lobbyIndex].host.id === "") {
-                lobbyData[lobbyIndex] = {...lobbyData[lobbyIndex], host: {...lobbyData[lobbyIndex].host, id: socket.id}}
-                currentHostId = socket.id
-                socket.emit('initilise-lobby', lobbyData[lobbyIndex], true)
-            } else {
-                currentHostId = lobbyData[lobbyIndex].host.id
-                socket.emit('initilise-lobby', lobbyData[lobbyIndex], false)
-            }   
+            currentHostId = socket.id
+            io.to(currentHostId).emit('initilise-lobby-host', lobbyData[lobbyIndex])
+            lobbyData.splice(lobbyIndex, 1)
+        } else {
+            socket.broadcast.to(currentRoomId).emit('initilise-lobby-player', socket.id)
         }
+    })
+
+    socket.on('send-lobby-data', (lobbyData, hostId, userId) => {
+        currentHostId = hostId
+        io.to(userId).emit('receive-lobby-data', lobbyData)
     })
 
     socket.on('add-new-player-to-playerList', (userId) => {
@@ -95,17 +96,10 @@ io.on('connection', (socket) => {
     
     socket.on('disconnect', () => {
         socket.removeAllListeners();   
-        const index = lobbyData.findIndex(lobby => lobby.lobbyId === currentRoomId)
-        if (index != -1) {
-            if (lobbyData[index].host.id === socket.id) {
-                lobbyData.splice(index, 1)
-                io.in(currentRoomId).emit('disconnect-all')
-                io.in(currentRoomId).disconnectSockets();
-            } else {
-                io.to(currentHostId).emit('remove-player', socket.id)
-            }
-        }
+        io.to(currentRoomId).emit('remove-player', socket.id)
         console.log("user disconnected: " + socket.id)
+        console.log("currenthost: " + currentHostId)
+
         
     })
   })

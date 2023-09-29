@@ -31,5 +31,4 @@ type Lobby = {
     openLobby: boolean
     spectator: boolean
     reroll: boolean
-    playerList?: PlayerStatus[]
 }

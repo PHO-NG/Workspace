@@ -8,12 +8,12 @@ import NewPlayer from '@/components/NewPlayer'
 import Lobby from '@/components/Lobby'
 import Game from '@/components/Game'
 import Loading from './loading'
-const socket = io('https://liars-dice-express-d026f352885a.herokuapp.com/', {
-  transports: ["websocket", "polling"],
-})
-// const socket = io('http://localhost:3001/', {
+// const socket = io('https://liars-dice-express-d026f352885a.herokuapp.com/', {
 //   transports: ["websocket", "polling"],
 // })
+const socket = io('http://localhost:3001/', {
+  transports: ["websocket", "polling"],
+})
 
 const Page: FC = () => {
   const lobbyId = usePathname().split('/')[2]
@@ -43,20 +43,31 @@ const Page: FC = () => {
   /* ---- INITILISE LOBBY ---- */
   useEffect(() => {
     socket.emit('find-lobby-on-server', lobbyId)
-    socket.on('initilise-lobby', (lobbyData, host) => {
+    socket.on('initilise-lobby-host', (lobbyData) => {
       if (lobbySettings.lobbyName === "") {
         setLobbySettings(lobbyData)
-        if (host) {
-          let tempList = [...playerList] as PlayerStatus[]
-          tempList.push({...lobbyData.host, id: socket.id, ready: false, filled: true, loaded: true})
-          setPlayerList(tempList)
-          setNewPlayerLoaded(true)
-        }
+        let tempList = [...playerList] as PlayerStatus[]
+        tempList.push({...lobbyData.host, id: socket.id, ready: false, filled: true, loaded: true})
+        setPlayerList(tempList)
+        setNewPlayerLoaded(true)
       }
     })
 
+    socket.on('initilise-lobby-player', (userId) => {
+      socket.emit('send-lobby-data', lobbySettings, socket.id, userId)
+    })
+
+    if (lobbySettings.lobbyName === "") {
+      socket.on('receive-lobby-data', (lobbyData) => {
+        console.log("TEST")
+        setLobbySettings(lobbyData)
+      })
+    }
+
     return () => {
       socket.off('initilise-lobby')
+      socket.off('receive-lobby-data')
+      socket.off('initilise-lobby-player')
     }  
   }, [lobbySettings])
 
@@ -197,9 +208,11 @@ const Page: FC = () => {
     /* ---- DISCONNECT FUNCTIONALITY ---- */
     socket.on('disconnect-all', () => {
       alert("Host Disconnected")
+      socket.close();
     })
 
     socket.on('remove-player', (userId) => {
+      console.log("USER LEFT: " + userId)
       let tempList = [...playerList]
       const index = tempList.findIndex(player => player.id === userId)
       if (index !== -1) {

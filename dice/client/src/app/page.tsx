@@ -5,29 +5,19 @@ import CreateLobby from '@/components/CreateLobby';
 import Title from '@/components/Title/Title';
 import './globals.css'
 
-const socket = io('https://liars-dice-express-d026f352885a.herokuapp.com/', {
-  transports: ["websocket", "polling"]
-})
-// const socket = io('http://localhost:3001/', {
+// const socket = io('https://liars-dice-express-d026f352885a.herokuapp.com/', {
 //   transports: ["websocket", "polling"]
 // })
+const socket = io('http://localhost:3001/', {
+  transports: ["websocket", "polling"]
+})
 
 export default function Home() {
   const [initiate, setInitiate] = React.useState(false)
-  const [gameId, setGameId] = React.useState("")
-
-  socket.on("get-userId", (arg) => {
-    setGameId(arg)
-
-    return (
-      socket.off("get-userId")
-    )
-  })
  
   return (
     <main>
       <Title />
-      {/* <UserSettings /> */}
       <div>
         {
           initiate === false
@@ -36,7 +26,7 @@ export default function Home() {
           :
           <>
             <button className="absolute top-3 left-3 text-red hover:text-white text-3xl font-bold" onClick={() => setInitiate(false)}>BACK</button>
-            <CreateLobby gameId={gameId} socket={socket}/>
+            <CreateLobby gameId={socket.id} socket={socket}/>
           </>
         }
       </div>
