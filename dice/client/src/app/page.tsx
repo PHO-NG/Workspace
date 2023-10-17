@@ -4,6 +4,7 @@ import { io } from 'socket.io-client'
 import CreateLobby from '@/components/CreateLobby';
 import Title from '@/components/Title/Title';
 import './globals.css'
+import Info from '@/components/Info';
 
 // const socket = io('https://liars-dice-express-d026f352885a.herokuapp.com/', {
 //   transports: ["websocket", "polling"]
@@ -18,6 +19,7 @@ export default function Home() {
   return (
     <main>
       <Title />
+      <Info />
       <div>
         {
           initiate === false
