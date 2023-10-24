@@ -1,10 +1,10 @@
 'use client'
-import React from 'react'
-import { io } from 'socket.io-client'
 import CreateLobby from '@/components/CreateLobby';
+import Info from '@/components/Info/Info';
 import Title from '@/components/Title/Title';
-import './globals.css'
-import Info from '@/components/Info';
+import React from 'react';
+import { io } from 'socket.io-client';
+import './globals.css';
 
 // const socket = io('https://liars-dice-express-d026f352885a.herokuapp.com/', {
 //   transports: ["websocket", "polling"]

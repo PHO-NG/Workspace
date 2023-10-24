@@ -1,12 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
-import { FC, Suspense, useEffect, useState } from 'react'
-import { usePathname } from 'next/navigation'
-import Link from 'next/link'
-import { io } from 'socket.io-client'
-import NewPlayer from '@/components/NewPlayer'
-import Lobby from '@/components/Lobby'
 import Game from '@/components/Game'
+import Info from '@/components/Info/Info'
+import Lobby from '@/components/Lobby'
+import NewPlayer from '@/components/NewPlayer'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { FC, Suspense, useEffect, useState } from 'react'
+import { io } from 'socket.io-client'
 import Loading from './loading'
 // const socket = io('https://liars-dice-express-d026f352885a.herokuapp.com/', {
 //   transports: ["websocket", "polling"],
@@ -235,6 +236,7 @@ const Page: FC = () => {
   }, [playerList])
 
   return <>
+  <Info />
   <Link href="/" className='absolute left-3 top-3 text-red hover:text-white text-3xl font-bold' onClick={() => socket.emit('disconnect')}>EXIT</Link>
   {fullLobby !== true ?
     (
