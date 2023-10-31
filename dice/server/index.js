@@ -17,7 +17,6 @@ let lobbyData = []
 
 io.on('connection', (socket) => {
     let currentRoomId
-    let currentHostId
     console.log("user connected: " + socket.id)
     socket.emit('get-userId', (socket.id))
     /* ---- LOBBY SETTINGS ---- */
@@ -32,16 +31,14 @@ io.on('connection', (socket) => {
         // Find lobbyId in array full of lobbyIds (host should always find one)
         const lobbyIndex = lobbyData.findIndex(lobby => lobby.lobbyId === lobbyId)
         if (lobbyIndex !== -1) {
-            currentHostId = socket.id
-            io.to(currentHostId).emit('initilise-lobby-host', lobbyData[lobbyIndex])
+            io.to(socket.id).emit('initilise-lobby-host', lobbyData[lobbyIndex])
             lobbyData.splice(lobbyIndex, 1)
         } else {
             socket.broadcast.to(currentRoomId).emit('initilise-lobby-player', socket.id)
         }
     })
 
-    socket.on('send-lobby-data', (lobbyData, hostId, userId) => {
-        currentHostId = hostId
+    socket.on('send-lobby-data', (lobbyData, userId) => {
         io.to(userId).emit('receive-lobby-data', lobbyData)
     })
 
@@ -54,7 +51,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('send-playerList-to-all', (list) => {
-        socket.broadcast.to(currentRoomId).emit('playerList-from-server', list)
+        io.to(currentRoomId).emit('playerList-from-server', list)
     })
 
     socket.on('playerList', (list) => {
@@ -95,12 +92,8 @@ io.on('connection', (socket) => {
     })
     
     socket.on('disconnect', () => {
-        socket.removeAllListeners();   
-        io.to(currentRoomId).emit('remove-player', socket.id)
-        console.log("user disconnected: " + socket.id)
-        console.log("currenthost: " + currentHostId)
-
-        
+        socket.removeAllListeners();
+        io.to(currentRoomId).emit('remove-player', socket.id)       
     })
   })
 
