@@ -6,12 +6,12 @@ import React from 'react';
 import { io } from 'socket.io-client';
 import './globals.css';
 
-// const socket = io('https://liars-dice-express-d026f352885a.herokuapp.com/', {
-//   transports: ["websocket", "polling"]
-// })
-const socket = io('http://localhost:3001/', {
+const socket = io('https://liars-dice-express-d026f352885a.herokuapp.com/', {
   transports: ["websocket", "polling"]
 })
+// const socket = io('http://localhost:3001/', {
+//   transports: ["websocket", "polling"]
+// })
 
 export default function Home() {
   const [initiate, setInitiate] = React.useState(false)

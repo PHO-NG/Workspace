@@ -9,12 +9,12 @@ import { usePathname } from 'next/navigation'
 import { FC, Suspense, useEffect, useState } from 'react'
 import { io } from 'socket.io-client'
 import Loading from './loading'
-// const socket = io('https://liars-dice-express-d026f352885a.herokuapp.com/', {
-//   transports: ["websocket", "polling"],
-// })
-const socket = io('http://localhost:3001/', {
+const socket = io('https://liars-dice-express-d026f352885a.herokuapp.com/', {
   transports: ["websocket", "polling"],
 })
+// const socket = io('http://localhost:3001/', {
+//   transports: ["websocket", "polling"],
+// })
 
 const Page: FC = () => {
   const lobbyId = usePathname().split('/')[2]
