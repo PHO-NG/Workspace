@@ -55,12 +55,11 @@ const Page: FC = () => {
     })
 
     socket.on('initilise-lobby-player', (userId) => {
-      socket.emit('send-lobby-data', lobbySettings, socket.id, userId)
+        socket.emit('send-lobby-data', lobbySettings, userId)
     })
 
     if (lobbySettings.lobbyName === "") {
       socket.on('receive-lobby-data', (lobbyData) => {
-        console.log("TEST")
         setLobbySettings(lobbyData)
       })
     }
@@ -91,7 +90,6 @@ const Page: FC = () => {
               loaded: false
             })  
           }    
-          setPlayerList(tempList)
           socket.emit('send-playerList-to-all', tempList)
         } else {
           socket.emit('reject-player', userId)
@@ -104,7 +102,10 @@ const Page: FC = () => {
     })
 
     socket.on('playerList-from-server', (list) => {
-      setPlayerList(list)
+      if (list.length > 0) {
+        setPlayerList(list)
+        console.log(playerList)
+      }
     })
 
     socket.on('finalise-player', (userData) => {
@@ -213,8 +214,7 @@ const Page: FC = () => {
     })
 
     socket.on('remove-player', (userId) => {
-      console.log("USER LEFT: " + userId)
-      let tempList = [...playerList]
+      let tempList = [...playerList] as PlayerStatus[]
       const index = tempList.findIndex(player => player.id === userId)
       if (index !== -1) {
         tempList.splice(index, 1)
